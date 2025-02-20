@@ -3,11 +3,18 @@ require('express-async-errors');
 const express = require('express');
 const app = express();
 
-// exxtra security packages
+// extra security packages
 const helmet = require('helmet');
 const cors = require('cors');
 const xss = require('xss-clean');
 const rateLimiter = require('express-rate-limit');
+
+app.get('/', (req, res) => {
+    res.send('<h1>Equipment Manager API</h1><a href="/api-docs">Documentation</a>');
+  })
+
+
+app.use(express.static("public"));
 
 
 // connectDB

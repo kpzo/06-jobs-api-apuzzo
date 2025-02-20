@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Equipment List</title>
+</head>
+
+  <body>
+    <h1>Equipment List</h1>
+    <hr />
+    <p id="message"></p>
+    <hr />
+    <div id="logon-register" style="display:none;">
+      <button type="button" id="logon">logon</button>
+      <button type="button" id="register">register</button>
+    </div>
+    <div id="logon-div" style="display:none;">
+      <form>
+        <div>
+          <label for="email">email:</label>
+          <input type="email" id="email" />
+        </div>
+        <div>
+          <label for="password">password:</label>
+          <input type="password" id="password" />
+        </div>
+        <button type="button" id="logon-button">logon</button>
+        <button type="button" id="logon-cancel">cancel</button>
+      </form>
+    </div>
+    <div id="register-div" style="display:none;">
+      <form>
+        <div>
+          <label for="name">name:</label>
+          <input type="text" id="name" />
+        </div>
+        <div>
+          <label for="email1">email:</label>
+          <input type="email" id="email1" />
+        </div>
+        <div>
+          <label for="password1">password:</label>
+          <input type="password" id="password1" />
+        </div>
+        <div>
+          <label for="password2">verify password:</label>
+          <input type="password" id="password2" />
+        </div>
+        <button type="button" id="register-button">register</button>
+        <button type="button" id="register-cancel">cancel</button>
+      </form>
+    </div>
+    <div id="equipment" style="display:none;">
+      <p id="equipment-message"></p>
+      <table id="equipment-table">
+        <tr id="equipment-table-header">
+          <th>Brand</th>
+          <th>Mount</th>
+          <th>Focal Length</th>
+          <th>Aperture</th>
+          <th>Version</th>
+          <th>Status</th>
+          <th>Updated By</th>
+          <th colspan="2"></th>
+        </tr>
+      </table>
+      <button type="button" id="add-equipment">add equipment</button>
+      <button type="button" id="logoff">log off</button>
+    </div>
+    <div id="edit-equipment" style="display:none;">
+      <form>
+        <div>
+          <label for="brand">brand:</label>
+          <input type="text" id="brand" />
+        </div>
+        <div>
+          <label for="mount">mount:</label>
+          <input type="text" id="mount" />
+        </div>
+        <div>
+            <label for="focal-length">focal length:</label>
+            <input type="text" id="focal-length" />
+          </div>
+          <div>
+            <label for="aperture">aperture:</label>
+            <input type="text" id="aperture" />
+          </div>
+          <div>
+            <label for="version">version:</label>
+            <input type="text" id="version" />
+          </div>
+          <div>
+            <label for="serial-number">serial number:</label>
+            <input type="text" id="serial-number" />
+          </div>
+          <div>
+            <label for="updated-by">updated by:</label>
+            <input type="text" id="updated-by" />
+          </div>
+        </div>
+        <div>
+          <label for="status">status:</label>
+          <select id="status">
+            <option value="available">available</option>
+            <option value="retired">retired</option>
+            <option value="in-use">in use</option>
+            <option value="reserved">reserved</option>
+            <option value="pending">pending</option>
+          </select>
+        </div>
+        <div>
+          <label for="remarks">remarks:</label>
+          <textarea id="remarks"></textarea>
+        </div>
+        <div>
+          <button type="button" id="add-remarks">add remarks</button>
+        </div>
+        <div id="remarks-section" style="display:none;">
+          <label for="remarks">remarks:</label>
+          <textarea id="remarks"></textarea>
+        </div>
+        <button type="button" id="update">update</button>
+        <button type="button" id="edit-cancel">cancel</button>
+      </form>
+    </div>
+    <script src="./index.js" type="module"></script>
+  </body>
+</html>

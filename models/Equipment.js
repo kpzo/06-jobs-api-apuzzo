@@ -32,6 +32,12 @@ const EquipmentSchema = new mongoose.Schema({
         enum: ['available', 'in use', 'retired', 'reserved', 'pending'],
         default: 'pending'
     },
+    serialNumber: {
+        type: String,
+        required: [true, 'Please provide a serial number'],
+        maxlength: 30,
+        unique: true
+    },
     createdBy: {
         type: mongoose.Types.ObjectId,
         ref: 'User',
