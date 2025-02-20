@@ -1,0 +1,21 @@
+// taken out of './controllers/auth' and turned into middleware in './models/User'
+    // get user info from body of input from user
+    const { name, email, password } = req.body
+
+    // generate random bytes for salt (salt = random string to be hashed with password) more = more secure, but requires more power
+    const salt = await bcrypt.genSalt(10)
+
+    // hash looks for pw & salt, then hashes it (key derivation function)
+    const hashedPassword = await bcrypt.hash(password, salt)
+    const tempUser = { 
+        name, 
+        email, 
+        password: hashedPassword
+    }
+
+    // mongoose validator will check for required fields (only sometimes in controller)
+    if(!name || !email || !password){
+        throw new BadRequestError('Please provide name, email and password.')
+    }
+    // save user info to db
+    const user = await User.create({...tempUser })
