@@ -1,70 +1,75 @@
-const Equipment = require('../models/Equipment')
-const { StatusCodes } = require('http-status-codes')
-const { BadRequestError, NotFoundError } = require('../errors')
+const Equipment = require('../models/Equipment');
+const { StatusCodes } = require('http-status-codes');
+const { BadRequestError, NotFoundError } = require('../errors');
+const authorizeRoles = require('../middleware/authorizeRoles');
+const auth = require('../middleware/authentication');
 
 const getAllEquipment = async (req, res) => {
-    // leave createdBy out of find() to allow all users to see all equipment all the time
-    const equipment = await Equipment.find({}).populate('createdBy', 'name')
-    res.status(StatusCodes.OK).json({ equipment, cout: equipment.length })
-}
+    try {
+        const equipment = await Equipment.find({}).populate('createdBy', 'name');
+        res.status(StatusCodes.OK).json({ equipment, count: equipment.length });
+    } catch (error) {
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Error fetching equipment' });
+    }
+};
 
 const getEquipment = async (req, res) => {
-    // leave userId out of the variable declaration to allow all users to see each single equipment listing
-    const { params: { id:equipmentId } } = req
+    const { params: { id: equipmentId } } = req;
 
-    const equipment = await Equipment.findOne({ _id: equipmentId, })
+    const equipment = await Equipment.findOne({ _id: equipmentId });
     if (!equipment) {
-        throw new NotFoundError(`No equipment with id : ${equipmentId}`)
+        throw new NotFoundError(`No equipment with id : ${equipmentId}`);
     }
-    res.status(StatusCodes.OK).json({ equipment })
-}
+    res.status(StatusCodes.OK).json({ equipment });
+};
 
 const createEquipment = async (req, res) => {
-    req.body.createdBy = req.user.userId
-    const equipment = await Equipment.create(req.body)
-    res
-        .status(StatusCodes.CREATED)
-        .json({ equipment })
-}
+    req.body.createdBy = req.user.userId;
+    if (!req.user) {
+        throw new BadRequestError('Please login to add equipment');
+    }
+    const equipment = await Equipment.create(req.body);
+    res.status(StatusCodes.CREATED).json({ equipment });
+};
 
 const updateEquipment = async (req, res) => {
     const {
         body: { status },
         user: { userId },
-        params: { id:equipmentId }
-    } = req
+        params: { id: equipmentId }
+    } = req;
 
     if (status === 'pending') {
-        throw new BadRequestError('Please locate equipment and update status')
+        throw new BadRequestError('Please locate equipment and update status');
     }
     const equipment = await Equipment.findOneAndUpdate(
         { _id: equipmentId },
         req.body,
         { new: true, runValidators: true }
-    )
+    );
     if (!equipment) {
-        throw new NotFoundError(`No equipment with id : ${equipmentId}`)
+        throw new NotFoundError(`No equipment with id : ${equipmentId}`);
     }
 
-    res.status(StatusCodes.OK).json({ equipment})
-}
+    res.status(StatusCodes.OK).json({ equipment });
+};
 
 const deleteEquipment = async (req, res) => {
-    const { params: { id: equipmentId } } = req
+    const { params: { id: equipmentId } } = req;
 
-    const equipment = await Equipment.findByIdAndRemove({ _id: equipmentId })
+    const equipment = await Equipment.findByIdAndRemove({ _id: equipmentId });
 
     if (!equipment) {
-        throw new NotFoundError(`No equipment with id : ${equipmentId}`)}
+        throw new NotFoundError(`No equipment with id : ${equipmentId}`);
+    }
 
-    res.status(StatusCodes.OK).send('Item deleted.')
-}
-
+    res.status(StatusCodes.OK).send('Item deleted.');
+};
 
 module.exports = {
     getAllEquipment,
     getEquipment,
-    createEquipment,
-    updateEquipment,
-    deleteEquipment,
-}
+    createEquipment: [authorizeRoles('admin', 'staff'), createEquipment],
+    updateEquipment: [authorizeRoles('admin', 'staff'), updateEquipment],
+    deleteEquipment: [authorizeRoles('admin', 'staff'), deleteEquipment],
+};

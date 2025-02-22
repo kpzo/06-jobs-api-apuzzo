@@ -2,6 +2,8 @@
 // ------------------
 // import model
 const User = require('../models/User')
+const checkRole = require('../middleware/checkRole')
+const auth = require('../middleware/authentication')
 
 // import libraries
 const { StatusCodes } = require('http-status-codes')
@@ -35,7 +37,8 @@ const login = async (req, res) => {
         throw new BadRequestError('Please provide email and password')
     }
 
-    const user = await User.findOne({ email })
+    // check if user exists
+    const user = await User.findOne({ email, role: { $in: ['admin', 'staff'] } })
 
     if (!user) {
         throw new UnauthenticatedError('Invalid Credentials')

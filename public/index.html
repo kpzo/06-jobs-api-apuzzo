@@ -4,127 +4,121 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Equipment List</title>
+    <link rel="stylesheet" href="/index.css" />
+    <title>SEC Carrboro Rentals</title>
 </head>
 
-  <body>
-    <h1>Equipment List</h1>
+<body>
+    <h1>Southeastern Camera Carrboro</h1>
+    <h2>Equipment Rental</h2>
+    <p>Welcome to the Southeastern Camera Carrboro Equipment Rental System. Please log in or register to view and reserve equipment. </p>
     <hr />
     <p id="message"></p>
     <hr />
-    <div id="logon-register" style="display:none;">
-      <button type="button" id="logon">logon</button>
-      <button type="button" id="register">register</button>
+    
+    <!-- Authentication Buttons -->
+    <div id="logon-register">
+        <button id="logon-button">Log in</button>
+        <button id="register-button">Register</button>
     </div>
+
+    <!-- Login Form -->
     <div id="logon-div" style="display:none;">
-      <form>
-        <div>
-          <label for="email">email:</label>
-          <input type="email" id="email" />
-        </div>
-        <div>
-          <label for="password">password:</label>
-          <input type="password" id="password" />
-        </div>
-        <button type="button" id="logon-button">logon</button>
-        <button type="button" id="logon-cancel">cancel</button>
-      </form>
+        <form id="logon-form">
+            <label for="email">Email:</label>
+            <input type="email" id="email" required />
+            
+            <label for="password">Password:</label>
+            <input type="password" id="password" required />
+            
+            <button type="submit">Log in</button>
+            <button type="button" id="logon-cancel">Cancel</button>
+        </form>
+        <button id="view-equipment-from-login">View Equipment</button>
     </div>
+
+    <!-- Registration Form -->
     <div id="register-div" style="display:none;">
-      <form>
-        <div>
-          <label for="name">name:</label>
-          <input type="text" id="name" />
-        </div>
-        <div>
-          <label for="email1">email:</label>
-          <input type="email" id="email1" />
-        </div>
-        <div>
-          <label for="password1">password:</label>
-          <input type="password" id="password1" />
-        </div>
-        <div>
-          <label for="password2">verify password:</label>
-          <input type="password" id="password2" />
-        </div>
-        <button type="button" id="register-button">register</button>
-        <button type="button" id="register-cancel">cancel</button>
-      </form>
+        <form id="register-form">
+            <label for="name">Name:</label>
+            <input type="text" id="name" required />
+
+            <label for="email1">Email:</label>
+            <input type="email" id="email1" required />
+
+            <label for="password1">Password:</label>
+            <input type="password" id="password1" required />
+
+            <label for="password2">Verify Password:</label>
+            <input type="password" id="password2" required />
+
+            <button type="submit">Register</button>
+            <button type="button" id="register-cancel">Cancel</button>
+        </form>
+        <button id="view-equipment-from-register">View Equipment</button>
     </div>
+
+    <!-- Equipment List -->
     <div id="equipment" style="display:none;">
-      <p id="equipment-message"></p>
-      <table id="equipment-table">
-        <tr id="equipment-table-header">
-          <th>Brand</th>
-          <th>Mount</th>
-          <th>Focal Length</th>
-          <th>Aperture</th>
-          <th>Version</th>
-          <th>Status</th>
-          <th>Updated By</th>
-          <th colspan="2"></th>
-        </tr>
-      </table>
-      <button type="button" id="add-equipment">add equipment</button>
-      <button type="button" id="logoff">log off</button>
+        <p id="equipment-message"></p>
+        <table id="equipment-table">
+            <tr>
+                <th>Brand</th>
+                <th>Mount</th>
+                <th>Focal Length</th>
+                <th>Aperture</th>
+                <th>Version</th>
+                <th>Status</th>
+                <th>Updated By</th>
+                <th colspan="2"></th>
+            </tr>
+        </table>
+        <button id="add-equipment">Add Equipment</button>
+        <button id="logoff">Log Out</button>
     </div>
+
+    <!-- Equipment Edit Form -->
     <div id="edit-equipment" style="display:none;">
-      <form>
-        <div>
-          <label for="brand">brand:</label>
-          <input type="text" id="brand" />
-        </div>
-        <div>
-          <label for="mount">mount:</label>
-          <input type="text" id="mount" />
-        </div>
-        <div>
-            <label for="focal-length">focal length:</label>
+        <form id="edit-form">
+            <label for="brand">Brand:</label>
+            <input type="text" id="brand" />
+
+            <label for="mount">Mount:</label>
+            <input type="text" id="mount" />
+
+            <label for="focal-length">Focal Length:</label>
             <input type="text" id="focal-length" />
-          </div>
-          <div>
-            <label for="aperture">aperture:</label>
+
+            <label for="aperture">Aperture:</label>
             <input type="text" id="aperture" />
-          </div>
-          <div>
-            <label for="version">version:</label>
+
+            <label for="version">Version:</label>
             <input type="text" id="version" />
-          </div>
-          <div>
-            <label for="serial-number">serial number:</label>
+
+            <label for="serial-number">Serial Number:</label>
             <input type="text" id="serial-number" />
-          </div>
-          <div>
-            <label for="updated-by">updated by:</label>
+            <label for="updated-by">Updated By:</label>
             <input type="text" id="updated-by" />
-          </div>
-        </div>
-        <div>
-          <label for="status">status:</label>
-          <select id="status">
-            <option value="available">available</option>
-            <option value="retired">retired</option>
-            <option value="in-use">in use</option>
-            <option value="reserved">reserved</option>
-            <option value="pending">pending</option>
-          </select>
-        </div>
-        <div>
-          <label for="remarks">remarks:</label>
-          <textarea id="remarks"></textarea>
-        </div>
-        <div>
-          <button type="button" id="add-remarks">add remarks</button>
-        </div>
-        <div id="remarks-section" style="display:none;">
-          <label for="remarks">remarks:</label>
-          <textarea id="remarks"></textarea>
-        </div>
-        <button type="button" id="update">update</button>
-        <button type="button" id="edit-cancel">cancel</button>
-      </form>
+
+            <label for="status">Status:</label>
+            <select id="status">
+          <option value="available">Available</option>
+          <option value="retired">Retired</option>
+          <option value="in-use">In Use</option>
+          <option value="reserved">Reserved</option>
+          <option value="pending">Pending</option>
+            </select>
+
+            <label for="remarks">Remarks:</label>
+            <textarea id="remarks"></textarea>
+            <button id="view-all-equipment">View All Equipment</button>
+            <button type="submit">Update</button>
+            <button type="button" id="edit-cancel">Cancel</button>
+        </form>
+        <div id="successMessage">Welcome to Rentals</div>
+        <div id="unauthMessage">You must be staff or admin to access</div>
     </div>
-    <script src="./index.js" type="module"></script>
-  </body>
+
+    <script src="/index.js" type="module"></script>
+</body>
 </html>

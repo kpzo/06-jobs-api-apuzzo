@@ -25,6 +25,11 @@ const UserSchema = new mongoose.Schema({
         required:[true, 'Please provide a password'],
         minlength:6,
     },
+    role:{
+        type:String,
+        enum:['user', 'staff', 'admin'],
+        default:'user',
+    },
 })
 
 // using "async function" so the schema referrs to OUR document (for commands like 'this.' etc) to gather specific user data from our db to hash the passwords before saving 
