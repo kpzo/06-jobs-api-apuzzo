@@ -6,29 +6,18 @@ const { login, register } = require('../controllers/auth');
 const auth = require('../middleware/authentication');
 
 
-// Debugging logs
-console.log("✅ Auth Routes Loaded");
 
 // Authentication API Routes
 router.post('/register', register);
-router.post('/login', login);
-
+router.post("/login", login);
 // Logout Route 
-router.post('/logout', (req, res) => {
+const tokenBlacklist = new Set(); // Store invalidated tokens (temporary storage)
 
-    req.logout();
-    res.status(200).json({ message: 'User logged out successfully. Please remove token on the client-side.' });
-});
 
-// Protected Route (Return user info)
-router.get('/protected', auth, (req, res) => {
-    res.status(200).json({
-        message: 'Access granted to protected route.',
-        user: req.user, // Ensuring authenticated user info is sent
-    });
+router.post('/logout', auth, (req, res) => {
+    const token = req.headers.authorization?.split(" ")[1]; // Extract token
+    if (token) tokenBlacklist.add(token); // Add to blacklist
+    res.status(200).json({ message: "Logged out. Token invalidated." });
 });
 
 module.exports = router;
-
-
-

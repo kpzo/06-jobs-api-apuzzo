@@ -37,9 +37,6 @@ const login = async (req, res) => {
         throw new BadRequestError('Please provide email and password')
     }
 
-    // check if user exists
-    const user = await User.findOne({ email, role: { $in: ['admin', 'staff'] } })
-
     if (!user) {
         throw new UnauthenticatedError('Invalid Credentials')
     }
