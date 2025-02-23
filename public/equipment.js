@@ -19,6 +19,7 @@ export const handleEquipment = () => {
   const addEquipment = document.getElementById("add-equipment");
   equipmentTable = document.getElementById("equipment-table");
   equipmentTableHeader = document.getElementById("equipment-table-header");
+  enableInput(true);
 
   equipmentDiv.addEventListener("click", (e) => {
     if (inputEnabled && e.target.nodeName === "BUTTON")
