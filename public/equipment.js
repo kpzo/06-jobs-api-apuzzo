@@ -42,6 +42,8 @@ export const handleEquipment = () => {
 
 export const showEquipment = () => {
   setDiv(equipmentDiv);
+  equipmentDiv.style.display = "block";
+  showEquipment();
 };
 
 
@@ -124,9 +126,9 @@ export const showEquipment = () => {
 //       if (message) message.textContent = data.msg || "Error loading equipment.";
 //     }
 //     showEditForm();
-//   }  
+// //   }  
 
-//   async function fetchAndDisplayEquipment() {
+//   export async function fetchAndDisplayEquipment() {
 //     console.log("🔹 Fetching equipment data...");
 //     const authToken = token(); // Store token in variable to avoid multiple calls
   

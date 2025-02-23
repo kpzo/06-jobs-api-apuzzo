@@ -20,12 +20,12 @@ export const handleRegister = () => {
   email1 = document.getElementById("email1");
   password1 = document.getElementById("password1");
   password2 = document.getElementById("password2");
-  const registerButton = document.getElementById("register-button");
+  const registerNowButton = document.getElementById("register-submit-button");
   const registerCancel = document.getElementById("register-cancel");
 
-  registerDiv.addEventListener("click", async (e) => {
+  registerDiv.addEventListener("submit", async (e) => {
     if (inputEnabled && e.target.nodeName === "BUTTON") {
-      if (e.target === registerButton) {
+      if (e.target === registerNowButton) {
         if (password1.value != password2.value) {
           message.textContent = "The passwords entered do not match.";
         } else {
@@ -54,7 +54,7 @@ export const handleRegister = () => {
               password1.value = "";
               password2.value = "";
 
-              showRegister();
+              showEquipment();
             } else {
               message.textContent = data.msg;
             }

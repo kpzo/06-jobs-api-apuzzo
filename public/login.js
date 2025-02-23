@@ -26,7 +26,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Add event listener for logonButton to show the login form
   logonButton.addEventListener("click", () => {
-    showLogin();
+    if (inputEnabled) {
+      showLogin();
+    }
   });
 
   // Add event listener for logonForm submit
@@ -70,8 +72,10 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   logonCancel.addEventListener("click", () => {
-    logonForm.reset(); // Reset entire form instead of clearing fields
-    showLoginRegister();
+    if (inputEnabled) {
+      logonForm.reset(); // Reset entire form instead of clearing fields
+      showLoginRegister();
+    }
   });
 });
 
@@ -88,7 +92,9 @@ export const handleLogin = () => {
 
   // Add event listener for logonButton to show the login form
   logonButton.addEventListener("click", () => {
-    showLogin();
+    if (inputEnabled) {
+      showLogin();
+    }
   });
 
   // Add event listener for logonForm submit
@@ -131,11 +137,48 @@ export const handleLogin = () => {
     enableInput(true);
   });
 
+  logonSubmit.addEventListener("click", async (e) => {
+    console.log("🔹 Login form submitted!");
+
+    const emailValue = email.value;
+    const passwordValue = password.value;
+
+    console.log("📩 Email:", emailValue);
+    console.log("🔑 Password:", passwordValue);
+
+    try {
+      const response = await fetch("/api/v1/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        body: JSON.stringify({ email: emailValue, password: passwordValue }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setToken(data.token);
+        message.textContent = `Logon successful. Welcome ${data.user.name}`;
+        viewAllEquipmentButton.style.display = "block"; 
+        showEquipment();
+      } else {
+        message.textContent = data.msg || 'Login Failed';
+      }
+    } catch (err) {
+      console.error("Error Logging In", err);
+      message.textContent = "Error Logging In";
+    }
+
+
   logonCancel.addEventListener("click", () => {
     logonForm.reset(); // Reset entire form instead of clearing fields
     showLoginRegister();
   });
+})
 };
+
 
 export const showLogin = () => {
   if (email && password) {
@@ -143,6 +186,4 @@ export const showLogin = () => {
     password.value = "";
   }
   setDiv(loginDiv);
-
-  loginDiv.style.display = "block";
 };
