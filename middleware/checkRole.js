@@ -1,11 +1,19 @@
+const { StatusCodes } = require("http-status-codes");
+const { BadRequestError } = require("../errors");
+
 const checkRole = (req, res, next) => {
-    const { role } = req.user; // Assuming the user's role is stored in req.user
+    const { user } = req;
+    if (!user || !user.role) {
+        return new BadRequestError('User role is not defined');
+    }
+
+    const { role } = user;
 
     if (role === 'staff' || role === 'admin') {
-        next(); // Allow access to the next middleware or route handler
+        return next(); // Allow access to the next middleware or route handler
     } else {
-        res.status(403).json({ message: 'Forbidden: You do not have permission to perform this action' });
+        return new BadRequestError('Forbidden: You do not have permission to perform this action');
     }
 };
 
-module.exports = checkRole;
+module.exports = checkRole

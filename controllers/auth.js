@@ -1,62 +1,46 @@
-// ~controllers are functions that control the routes~
-// ------------------
-// import model
-const User = require('../models/User')
-const checkRole = require('../middleware/checkRole')
-const auth = require('../middleware/authentication')
+const express = require('express');
+const router = express.Router();
+const { StatusCodes } = require('http-status-codes');
+const User = require('../models/User');
+const auth = require('../middleware/authentication');
+const { BadRequestError, UnauthenticatedError } = require('../errors');
 
-// import libraries
-const { StatusCodes } = require('http-status-codes')
-
-// import error handler
-const { BadRequestError } = require('../errors')
-const { UnauthenticatedError } = require('../errors')
-
-// register user
+// Register user
 const register = async (req, res) => {
+  const user = await User.create({ ...req.body });
+  const token = user.createJWT();
+  res.status(StatusCodes.CREATED).json({ user: { name: user.name }, token });
+};
 
-    // create user
-    const user = await User.create({ ...req.body })
-    const token = user.createJWT()
-    
-    // send only name and pw token as response; store in local storage
-    res
-    .status(StatusCodes.CREATED)
-    .json({ user:{ name: user.name }, token })
-}
-
-
-// login user
+// Login user
 const login = async (req, res) => {
-//initial checking in controller
+  const { email, password } = req.body;
 
-    const { email, password } = req.body
-    
-    // check if user exists
-    if (!email || !password) {
-        throw new BadRequestError('Please provide email and password')
-    }
+  if (!email || !password) {
+    throw new BadRequestError('Please provide email and password');
+  }
 
-    if (!user) {
-        throw new UnauthenticatedError('Invalid Credentials')
-    }
-    
-    //compare password to hashed password in db
-    const isPasswordCorrect = await user.comparePassword(password)
-    if (!isPasswordCorrect) {
-        throw new UnauthenticatedError('Invalid Credentials')
-    }
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw new UnauthenticatedError('Invalid Credentials');
+  }
 
-    const token = user.createJWT()
-    res
-    .status(StatusCodes.OK)
-    .json({ user: { name: user.name }, token })
+  const isPasswordCorrect = await user.comparePassword(password);
+  if (!isPasswordCorrect) {
+    throw new UnauthenticatedError('Invalid Credentials');
+  }
 
-}
+  const token = user.createJWT();
+  res.status(StatusCodes.OK).json({ user: { name: user.name }, token });
+};
+
+// Protected route example
+const getProfile = async (req, res) => {
+  res.status(StatusCodes.OK).json({ user: req.user });
+};
 
 module.exports = {
-    register,
-    login,
-}
-
-// mongoose middleware needed to de-bloat code in this controller
+  register,
+  login,
+  getProfile,
+};

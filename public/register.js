@@ -23,9 +23,8 @@ export const handleRegister = () => {
   const registerNowButton = document.getElementById("register-submit-button");
   const registerCancel = document.getElementById("register-cancel");
 
-  registerDiv.addEventListener("submit", async (e) => {
-    if (inputEnabled && e.target.nodeName === "BUTTON") {
-      if (e.target === registerNowButton) {
+  registerNowButton.addEventListener("click", async (e) => {
+    if (inputEnabled) {
         if (password1.value != password2.value) {
           message.textContent = "The passwords entered do not match.";
         } else {
@@ -65,14 +64,18 @@ export const handleRegister = () => {
 
           enableInput(true);
         }
-      } else if (e.target === registerCancel) {
+      }
         name.value = "";
         email1.value = "";
         password1.value = "";
         password2.value = "";
         showLoginRegister();
-      }
-    }
+      });
+          
+
+  registerCancel.addEventListener("click", (e) => {
+    e.preventDefault();
+    showLoginRegister();
   });
 };
 
@@ -81,4 +84,12 @@ export const showRegister = () => {
   password1.value = null;
   password2.value = null;
   setDiv(registerDiv);
-};
+  
+  const registerNowButton = document.getElementById("register-submit-button");
+  const registerCancel = document.getElementById("register-cancel");
+
+
+  message.textContent = ""; 
+  registerNowButton.style.display = "block";
+  registerCancel.style.display = "block";
+  registerDiv.style.display = "block";};
