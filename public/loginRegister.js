@@ -6,8 +6,8 @@ let loginRegisterDiv = null;
 
 export const handleLoginRegister = () => {
   loginRegisterDiv = document.getElementById("logon-register");
-  const login = document.getElementById("logon");
-  const register = document.getElementById("register");
+  const login = document.getElementById("logon-button");
+  const register = document.getElementById("register-button");
 
   loginRegisterDiv.addEventListener("click", (e) => {
     if (inputEnabled && e.target.nodeName === "BUTTON") {
@@ -21,5 +21,9 @@ export const handleLoginRegister = () => {
 };
 
 export const showLoginRegister = () => {
-  setDiv(loginRegisterDiv);
+  if (loginRegisterDiv) {
+    setDiv(loginRegisterDiv);
+  } else {
+    console.error("Login/Register div is not initialized.");
+  }
 };

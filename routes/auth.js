@@ -1,15 +1,17 @@
 const express = require('express');
-const path = require('path');
 const router = express.Router();
 
 const { login, register } = require('../controllers/auth');
 const auth = require('../middleware/authentication');
 
 
-
 // Authentication API Routes
-router.post('/register', register);
+
+router.post("/register", register);
 router.post("/login", login);
+
+
+
 // Logout Route 
 const tokenBlacklist = new Set(); // Store invalidated tokens (temporary storage)
 

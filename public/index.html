@@ -20,12 +20,14 @@
 
   <!-- Authentication Buttons -->
   <div id="logon-register">
-    <button type="button" id="logon-button">Log in</button>
-    <button type="button" id="register-button">Register</button>
+    <p>Welcome!</p>
+    <button type="button" id="logon-button" style="display: none;">Log in</button>
+    <button type="button" id="register-button" style="display: none;">Register</button>
   </div>
 
   <!-- Login Form -->
-  <div id="logon-div" style="display:none;">
+  <div id="logon-div" style="display: none;">
+    <p>Log in to view equipment.</p>
     <form id="logon-form">
       <label for="email">Email:</label>
       <input type="email" id="email" required />
@@ -40,7 +42,8 @@
   </div>
 
   <!-- Registration Form -->
-  <div id="register-div" style="display:none;">
+  <div id="register-div" style="display: none;">
+    <p>Register to view equipment.</p>
     <form id="register-form">
       <label for="name">Name:</label>
       <input type="text" id="name" required />
@@ -61,7 +64,8 @@
   </div>
 
   <!-- Equipment List -->
-  <div id="equipment" style="display:none;">
+  <div id="equipment" style="display: none;">
+    <h2>Equipment List</h2>
     <p id="equipment-message"></p>
     <table id="equipment-table">
       <tr>
@@ -80,7 +84,8 @@
   </div>
 
   <!-- Equipment Edit Form -->
-  <div id="edit-equipment" style="display:none;">
+  <div id="edit-equipment" style="display: none;">
+    <h2>Edit Equipment</h2>
     <form id="edit-form">
       <label for="brand">Brand:</label>
       <input type="text" id="brand" />
@@ -121,9 +126,7 @@
     <div id="unauthMessage">You must be staff or admin to access</div>
   </div>
 
-  <div id="confirmationMessage" style="display:none;"></div>
-
   <script src="/index.js" type="module"></script>
-</body>
 
+</body>
 </html>

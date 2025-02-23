@@ -8,7 +8,6 @@ import {
 } from "./index.js";
 import { showLoginRegister } from "./loginRegister.js";
 import { showAddEdit } from "./addEdit.js";
-import { showRegister } from "./register.js";
 
 let equipmentDiv = null;
 let equipmentTable = null;
