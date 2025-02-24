@@ -82,6 +82,9 @@ export const handleRegister = () => {
 };
 
 export const showRegister = () => {
+  registerDiv = document.getElementById("register-div");
+  const registerCancel = document.getElementById("register-cancel");
+  const registerNowButton = document.getElementById("register-now-button");
   setDiv(registerDiv);
   
   enableInput(true);
@@ -95,5 +98,4 @@ export const showRegister = () => {
     e.preventDefault();
     handleRegister();
   });
-showRegister();
 };

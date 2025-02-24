@@ -41,10 +41,9 @@
         <option value="admin">Admin</option>
       </select>
 
-      <button type="submit" id="logon-submit">Log in Now</button>
+      <button type="button" id="logon-submit">Log in Now</button>
     </form>
     <button type="button" id="logon-cancel">Cancel</button>
-    <button id="view-equipment-from-login">View Equipment</button>
   </div>
 
   <!-- Registration Form -->
@@ -66,11 +65,10 @@
       <button id="register-now-button" type="submit">Register Now</button>
       <button type="button" id="register-cancel">Cancel</button>
     </form>
-    <button id="view-equipment-from-register">View Equipment</button>
   </div>
 
   <!-- Equipment List -->
-  <div id="equipment" style="display: none;">
+  <div id="equipment-div" style="display: none;">
     <h2>Equipment List</h2>
     <p id="equipment-message"></p>
     <table id="equipment-table">
@@ -85,36 +83,37 @@
         <th colspan="2"></th>
       </tr>
     </table>
-    <button id="add-equipment">Add Equipment</button>
+    <button id="add-equipment-div">Add Equipment</button>
     <button id="logoff">Log Out</button>
   </div>
 
   <!-- Equipment Edit Form -->
-  <div id="edit-equipment" style="display: none;">
+  <div id="edit-equipment-div" style="display: none;">
     <h2>Edit Equipment</h2>
     <form id="edit-form">
-      <label for="brand">Brand:</label>
-      <input type="text" id="brand" />
+      <label for="edit-brand">Brand:</label>
+      <input type="text" id="edit-brand" />
 
-      <label for="mount">Mount:</label>
-      <input type="text" id="mount" />
+      <label for="edit-mount">Mount:</label>
+      <input type="text" id="edit-mount" />
 
-      <label for="focal-length">Focal Length:</label>
-      <input type="text" id="focal-length" />
+      <label for="edit-focal-length">Focal Length:</label>
+      <input type="text" id="edit-focal-length" />
 
-      <label for="aperture">Aperture:</label>
-      <input type="text" id="aperture" />
+      <label for="edit-aperture">Aperture:</label>
+      <input type="text" id="edit-aperture" />
 
-      <label for="version">Version:</label>
-      <input type="text" id="version" />
+      <label for="edit-version">Version:</label>
+      <input type="text" id="edit-version" />
 
-      <label for="serial-number">Serial Number:</label>
-      <input type="text" id="serial-number" />
-      <label for="updated-by">Updated By:</label>
-      <input type="text" id="updated-by" />
+      <label for="edit-serial-number">Serial Number:</label>
+      <input type="text" id="edit-serial-number" />
+
+      <label for="edit-updated-by">Updated By:</label>
+      <input type="text" id="edit-updated-by" required />
 
       <label for="status">Status:</label>
-      <select id="status">
+      <select id="status" required>
         <option value="available">Available</option>
         <option value="retired">Retired</option>
         <option value="in-use">In Use</option>
@@ -122,16 +121,61 @@
         <option value="pending">Pending</option>
       </select>
 
-      <label for="remarks">Remarks:</label>
-      <textarea id="remarks"></textarea>
+      <label for="edit-remarks">Remarks:</label>
+      <textarea id="edit-remarks"></textarea>
+
+      <button type="button" id="edit-equipment-button">Edit Equipment</button>
       <button type="button" id="view-all-equipment">View All Equipment</button>
-      <button type="submit">Update</button>
+      <button type="submit" id="submit-update">Update</button>
+      <button type="button" id="delete-equipment">Delete</button>
+      <button type="button" id="add-new-equipment">Add New Equipment</button>
       <button type="button" id="edit-cancel">Cancel</button>
     </form>
     <div id="successMessage">Equipment updated successfully.</div>
     <div id="unauthMessage">You must be staff or admin to access</div>
 </div>
 
+<!-- Add Equipment Form -->
+<div id="add-equipment-div" style="display: none;">
+  <h2>Add Equipment</h2>
+  <form id="add-equipment-form">
+    <label for="add-brand">Brand:</label>
+    <input type="text" id="add-brand" />
+
+    <label for="add-mount">Mount:</label>
+    <input type="text" id="add-mount" />
+
+    <label for="add-focal-length">Focal Length:</label>
+    <input type="text" id="add-focal-length" />
+
+    <label for="add-aperture">Aperture:</label>
+    <input type="text" id="add-aperture" />
+
+    <label for="add-version">Version:</label>
+    <input type="text" id="add-version" />
+
+    <label for="add-serial-number">Serial Number:</label>
+    <input type="text" id="add-serial-number" />
+
+    <label for="add-updated-by">Updated By:</label>
+    <input type="text" id="add-updated-by" />
+
+    <label for="add-status">Status:</label>
+    <select id="add-status">
+      <option value="available">Available</option>
+      <option value="retired">Retired</option>
+      <option value="in-use">In Use</option>
+      <option value="reserved">Reserved</option>
+      <option value="pending">Pending</option>
+    </select>
+
+    <label for="add-remarks">Remarks:</label>
+    <textarea id="add-remarks"></textarea>
+    <button type="button" id="back-to-all-equipment">Back To All Equipment</button>
+    <button type="submit" id="submit-add">Add</button>
+    <button type="button" id="add-cancel">Cancel</button>
+
+  </form>
   <script src="/index.js" type="module"></script>
 
 </body>

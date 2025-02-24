@@ -5,6 +5,11 @@ const jwt = require('jsonwebtoken')
 
 
 const UserSchema = new mongoose.Schema({
+    id:{
+        type:mongoose.Types.ObjectId,
+        ref:'User',
+        required:[true, 'Please provide a creator'],
+    },
     name:{
         type:String,
         required:[true, 'Please provide a name'],

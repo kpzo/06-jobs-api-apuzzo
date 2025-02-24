@@ -1,8 +1,9 @@
-
 let activeDiv = null;
 export const setDiv = (newDiv) => {
-  if (newDiv !== activeDiv) {
-    if (activeDiv) activeDiv.style.display = "none";
+  if (newDiv != activeDiv) {
+    if (activeDiv) {
+      activeDiv.style.display = "none";
+    }
     newDiv.style.display = "block";
     activeDiv = newDiv;
   }
@@ -19,9 +20,11 @@ export const setToken = (value) => {
   token = value;
   if (value) {
     localStorage.setItem("token", value);
-    userRole = decodedToken.role;
+    const userRole = JSON.parse(atob(value.split(".")[1])).role;
+    localStorage.setItem("role", userRole);
   } else {
     localStorage.removeItem("token");
+    localStorage.removeItem("role");
   }
 };
 
@@ -39,16 +42,20 @@ export const handleLogoff = () => {
 
 
 export let message = null;
+export let role = null;
+
 
 import { handleLoginRegister, showLoginRegister } from "./loginRegister.js";
 import { handleLogin, showLogin } from "./login.js";
 import { handleRegister, showRegister } from "./register.js";
+import { showEquipment } from "./equipment.js";
 
 
 document.addEventListener("DOMContentLoaded", (e) => {
   e.preventDefault();
   token = localStorage.getItem("token");
   message = document.getElementById("message");
+  role = localStorage.getItem("role");
   showLogin();
   showRegister();
   handleLoginRegister();
