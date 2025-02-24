@@ -8,6 +8,7 @@ import {
 } from "./index.js";
 import { showLoginRegister } from "./loginRegister.js";
 import { showRegister } from "./register.js";
+import { showWelcome } from "./welcome.js";
 
 let loginDiv = null;
 
@@ -72,12 +73,19 @@ export const handleLogin = async (emailValue, passwordValue, roleValue) => {
   const addEquipmentButton = document.getElementById("add-equipment-button");
   const loginDiv = document.getElementById("logon-div");
   const loginRegisterDiv = document.getElementById("logon-register-div");
-  loginDiv = document.getElementById("logon-div");
   const logonForm = document.getElementById("logon-form");
   const logonSubmit = document.getElementById("logon-submit");
   const email = document.getElementById("email");
   const logonButton = document.getElementById("logon-button");
   const password = document.getElementById("password");
+  const welcomeDiv = document.getElementById("welcome-div");
+  const welcomeViewEquipmentButton = document.getElementById("view-equipment-after-login-button");
+  const logoutFromWelcomeButton = document.getElementById("logout-from-welcome-button");
+  const welcomeAddEquipmentButton = document.getElementById("add-equipment-after-login-button");
+
+  if (!loginDiv) {
+    loginDiv = document.getElementById("logon-div");
+  }
 
 // Add event listener for logonButton to show the login form
   logonButton.addEventListener("click", (e) => {
@@ -95,12 +103,8 @@ export const handleLogin = async (emailValue, passwordValue, roleValue) => {
     const emailValue = email.value;
     const passwordValue = password.value;
     const roleValue = role.value;
-
     const loginSuccess = await handleLogin(emailValue, passwordValue, roleValue);
     
-    if (!loginSuccess) {
-      console.error("Login failed");
-    } else {
      try {
     // 🔹 Send login request to the API
     const response = await fetch("/api/v1/auth/login", {
@@ -120,8 +124,6 @@ export const handleLogin = async (emailValue, passwordValue, roleValue) => {
 
     console.log("Login Successful:", data.user.name);
 
-    loginDiv.style.display = "none";
-
     // 🔹 Save user info securely
     localStorage.setItem("user", JSON.stringify(data.user));
     localStorage.setItem("token", data.token);
@@ -130,14 +132,19 @@ export const handleLogin = async (emailValue, passwordValue, roleValue) => {
     // 🔹 UI Updates After Login
     message.textContent = `Welcome ${data.user.name}`;
     loginDiv.style.display = "none";
-    loginRegisterDiv.style.display = "block";
+    loginRegisterDiv.style.display = "none";
+    equipmentDiv.style.display = "none";
 
         // 🔹 Show Add Equipment Button if Admin/Staff
     if (data.user.role === "admin" || data.user.role === "staff") {
-      console.log("Showing Add Equipment Button");
-      setDiv(equipmentDiv);
-      addEquipmentButton.style.display = "block";
+      console.log("Showing Welcome Buttons for Admin/Staff");
+      setDiv(welcomeDiv);
+      welcomeViewEquipmentButton.style.display = "block";
+      logoutFromWelcomeButton.style.display = "block";
+      welcomeAddEquipmentButton.style.display = "block";
+      showWelcome();
     } else {
+      setDiv(equipmentDiv);
       addEquipmentButton.style.display = "none";
     }
 
@@ -147,8 +154,7 @@ export const handleLogin = async (emailValue, passwordValue, roleValue) => {
     message.textContent = "Error logging in.";
     return false;
   }
-}
-});
+  })
 }
 
 export const showLogin = () => {

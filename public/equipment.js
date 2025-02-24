@@ -32,9 +32,8 @@ export const handleEquipment = async () => {
   const viewAllEquipmentButton = document.getElementById("view-all-equipment");
   equipmentTable = document.getElementById("equipment-table");
   equipmentTableHeader = document.getElementById("equipment-table-header");
-  const logonDiv = document.getElementById("logon-div");
 
-  setDiv(logonDiv);
+  setDiv(equipmentDiv);
   enableInput(true);
   
   addEquipmentDiv.style.display = "none";
