@@ -7,7 +7,7 @@ const checkRole = (req, res, next) => {
         return new BadRequestError('User role is not defined');
     }
 
-    const { role } = user;
+    const { role } = user.role;
 
     if (role === 'staff' || role === 'admin') {
         return next(); // Allow access to the next middleware or route handler
