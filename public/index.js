@@ -56,13 +56,20 @@ document.addEventListener("DOMContentLoaded", (e) => {
   token = localStorage.getItem("token");
   message = document.getElementById("message");
   role = localStorage.getItem("role");
-  showLogin();
-  showRegister();
-  handleLoginRegister();
-  handleLogin();
-  handleRegister();
+  
   if (token) {
-    showEquipment();
+    handleLoginRegister();
+    handleLogin();
+    handleRegister();
+
+    const viewAllEquipmentButton = document.getElementById("view-all-equipment");
+    if (viewAllEquipmentButton) {
+      viewAllEquipmentButton.style.display = "block";
+      viewAllEquipmentButton.addEventListener("click", (e) => {
+        e.preventDefault();
+        showEquipment();
+      });
+    }
   } else {
     showLoginRegister();
   }

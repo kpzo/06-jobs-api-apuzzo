@@ -11,6 +11,8 @@ import { showAddEdit } from "./addEdit.js";
 import { showLogin } from "./login.js";
 import { showLoginRegister } from "./loginRegister.js";
 
+const API_URL = "http://localhost:5000/api/v1";
+
 let equipmentDiv = null;
 let equipmentTable = null;
 let equipmentTableHeader = null;
@@ -18,7 +20,7 @@ let response = null;
 let data = null;
 
 export const handleEquipment = async () => {
-  response = await fetch('/equipment', {
+  response = await fetch(`${API_URL}/equipment`, {
     headers: {
       Authorization: `Bearer ${token()}`,
     },
@@ -31,28 +33,30 @@ export const handleEquipment = async () => {
   const viewAllEquipmentButton = document.getElementById("view-all-equipment");
   equipmentTable = document.getElementById("equipment-table");
   equipmentTableHeader = document.getElementById("equipment-table-header");
+  const logonDiv = document.getElementById("logon-div");
 
+  setDiv(logonDiv);
   enableInput(true);
+  
+  addEquipmentDiv.style.display = "none";
+  editEquipmentDiv.style.display = "none";
+  viewAllEquipmentButton.style.display = "block";
+  logoff.style.display = "block";
 
-viewAllEquipmentButton.addEventListener("click", (e) => {
-  e.preventDefault();
-  fetchAndDisplayEquipment();
-  if (inputEnabled && e.target.nodeName === "BUTTON") {
-    if (e.target === addEquipment) {
-      showAddEdit(null);
-    } else if (e.target === logoff) {
-      showLoginRegister();
+  viewAllEquipmentButton.addEventListener("click", (e) => {
+    e.preventDefault();
+    fetchAndDisplayEquipment();
+    if (inputEnabled && e.target.nodeName === "BUTTON") {
+      if (e.target === addEquipment) {
+        showAddEdit(null);
+      } else if (e.target === logoff) {
+        setToken(null);
+        message.textContent = "You have been logged off.";
+        equipmentTable.replaceChildren([equipmentTableHeader]);
+        showLoginRegister();
+      }
     }
-  } else if (e.target === logoff) {
-    setToken(null);
-
-    message.textContent = "You have been logged off.";
-
-    equipmentTable.replaceChildren([equipmentTableHeader]);
-
-    showLoginRegister();
-  }
-});
+  });
 };
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -70,22 +74,22 @@ document.addEventListener('DOMContentLoaded', () => {
   const submitUpdate = document.getElementById('submit-update');
   const submitAdd = document.getElementById('submit-add');
   const submitDelete = document.getElementById('submit-delete');
-  const addNewEquipment = document.getElementById('add-equipment-div');
+  const addEquipmentDiv = document.getElementById('add-equipment-div');
   const equipmentTable = document.getElementById('equipment-table');
   const editEquipmentButton = document.getElementById('edit-equipment-button');
+  const addEquipmentButton = document.getElementById('add-equipment-button');
 
   logonButton.addEventListener('click', () => {
-      logonDiv.style.display = 'block';
+      logonDiv.style.display = 'none';
       registerDiv.style.display = 'none';
-      equipmentDiv.style.display = 'none';
+      equipmentDiv.style.display = 'block';
       editEquipmentDiv.style.display = 'none';
-      showLogin(); // Calls the function to render equipment dynamically
   });
 
   registerButton.addEventListener('click', () => {
-      registerDiv.style.display = 'block';
+      registerDiv.style.display = 'none';
       logonDiv.style.display = 'none';
-      equipmentDiv.style.display = 'none';
+      equipmentDiv.style.display = 'block';
       editEquipmentDiv.style.display = 'none';
   });
 
@@ -106,10 +110,29 @@ document.addEventListener('DOMContentLoaded', () => {
       fetchAndDisplayEquipment();
   });
 
-  addNewEquipment.addEventListener('click', (e) => {
-      e.preventDefault();
-      showAddEquipmentForm();
-  }); 
+  addEquipmentButton.addEventListener('click', async (e) => {
+    e.preventDefault();
+    const form = document.getElementById('edit-form');
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData);
+    const response = await fetch(`${API_URL}/equipment`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token()}`,
+      },
+      body: JSON.stringify(data),
+    });
+    if (response.ok) {
+      const { equipment } = await response.json();
+      updateEquipmentTable(equipment);
+      form.reset();
+      showEquipment();
+    } else {
+      const { message } = await response.json();
+      document.getElementById('equipment-message').textContent = message;
+    }
+  })
 
   submitAdd.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -195,7 +218,7 @@ document.addEventListener('DOMContentLoaded', () => {
   
   export async function fetchAndDisplayEquipment() {
     console.log("🔹 Fetching equipment data...");
-    const authToken = token(); // Store token in variable to avoid multiple calls
+    const authToken = token; // Store token in variable to avoid multiple calls
   
     try {
       const response = await fetch(`${API_URL}/equipment`, {
@@ -207,10 +230,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const { equipment } = await response.json();
       updateEquipmentTable(equipment);
 
-      fetchAndDisplayEquipment();
     } catch (error) {
       console.error("Error fetching equipment:", error);
-      document.getElementById("equipment-message").textContent = "Error loading equipment.";
+      document.getElementById("message").textContent = "Error loading equipment.";
     }
   }
 
@@ -222,42 +244,40 @@ document.addEventListener('DOMContentLoaded', () => {
     const editEquipmentDiv = document.getElementById('edit-equipment-div');
     equipmentDiv.style.display = 'none';
     editEquipmentDiv.style.display = 'block';
+    const id = e.target.getAttribute('data-id');
 
  try {
     const response = await fetch(`${API_URL}/equipment/${id}`, {
       headers: {
         Authorization: `Bearer ${token()}`,
       },
-    });
+    })
     if (!response.ok) throw new Error("Failed to fetch equipment");
 
     const { equipment } = await response.json();
     showEditForm(equipment);
-
-    
-  showAddEquipmentForm();
   }
   catch (error) {
     console.error("Error fetching equipment:", error);
-    document.getElementById("equipment-message").textContent = "Error loading equipment.";
+    document.getElementById("message").textContent = "Error loading equipment.";
   }
 }  
   export function updateEquipmentTable(equipment) {
     const equipmentTable = document.getElementById('equipment-table');
-    const equipmentMessage = document.getElementById('equipment-message');
-  
-    if (!equipmentTable || !equipmentMessage) {
+    const message = document.getElementById('message');
+
+    if (!equipmentTable || !message) {
       return console.error("Equipment table or message element not found");
     }
     // Clear existing table rows except the header
     equipmentTable.querySelectorAll('tr:not(:first-child)').forEach(row => row.remove());
   
     if (!equipment.length) {
-      equipmentMessage.textContent = "No equipment available.";
+      message.textContent = "No equipment available.";
       return;
     }
   
-    equipmentMessage.textContent = "";
+    message.textContent = "";
     equipment.forEach(item => {
       const row = document.createElement('tr');
       row.innerHTML = `
@@ -274,19 +294,23 @@ document.addEventListener('DOMContentLoaded', () => {
       equipmentTable.appendChild(row);
     });
   }
+
+
   export const showEquipment = () => {
     const equipmentDiv = document.getElementById("equipment-div");
     const editEquipmentButton = document.getElementById("edit-equipment-button");
     const addNewEquipment = document.getElementById("add-equipment-div");
     const token = localStorage.getItem("token");
+
+    if (!token) return;
+
     setDiv(equipmentDiv);
-    
     enableInput(false);
   
     message.textContent = ""; 
     editEquipmentButton.style.display = "block";
     addNewEquipment.style.display = "block";
-    equipmentDiv.style.display = token ? "block" : "none";
+    equipmentDiv.style.display = "block";
   
     editEquipmentButton.addEventListener("click", (e) => {
       e.preventDefault();

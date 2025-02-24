@@ -7,6 +7,7 @@ import {
 } from "./index.js";
 import { showLoginRegister } from "./loginRegister.js";
 import { showEquipment } from "./equipment.js";
+
 let registerDiv = null;
 let name = null;
 let email1 = null;
@@ -85,7 +86,12 @@ export const showRegister = () => {
   registerDiv = document.getElementById("register-div");
   const registerCancel = document.getElementById("register-cancel");
   const registerNowButton = document.getElementById("register-now-button");
+  const equipmentDiv = document.getElementById("equipment-div");
+  const addEquipmentDiv = document.getElementById("add-equipment-div");
+
   setDiv(registerDiv);
+  equipmentDiv.style.display = "none";
+  addEquipmentDiv.style.display = "none";
   
   enableInput(true);
 

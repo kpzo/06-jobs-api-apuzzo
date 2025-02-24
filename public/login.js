@@ -1,5 +1,3 @@
-console.log("🚀 login.js is loaded and running!");
-
 // Purpose: Handle the login form and login process.
 import {
   inputEnabled,
@@ -9,7 +7,7 @@ import {
   setToken,
 } from "./index.js";
 import { showLoginRegister } from "./loginRegister.js";
-import { showEquipment } from "./equipment.js";
+import { showRegister, handleRegister } from "./register.js";
 
 let loginDiv = null;
 let email = null;
@@ -23,23 +21,43 @@ document.addEventListener("DOMContentLoaded", () => {
   const logonSubmit = document.getElementById("logon-submit");
   const logonButton = document.getElementById("logon-button");
   const logonCancel = document.getElementById("logon-cancel");
+  const logonRegisterDiv = document.getElementById("logon-register-div");
+  const registerButton = document.getElementById("register-button");
   const viewAllEquipmentButton = document.getElementById("view-all-equipment");
+  const equipmentDiv = document.getElementById("equipment-div");
+  const addEquipmentDiv = document.getElementById("add-equipment-div");
+  const addEquipmentButton = document.getElementById("add-equipment-button");
   const user = JSON.parse(localStorage.getItem("user"));
   const userRole = user ? user.role : null;
   const roleInput = document.getElementById("role");
   roleInput.value = userRole;
-  const addEquipmentButton = document.getElementById("add-equipment");
 
-  setDiv(loginDiv);
 
-  logonSubmit.style.display = "none";
+  setDiv(logonRegisterDiv);
+
+  addEquipmentDiv.style.display = "none";
+  equipmentDiv.style.display = "none";
+  logonForm.style.display = "none";
+  logonSubmit.style.display = "block";
   logonCancel.style.display = "none";
+  logonButton.style.display = "block";
+  registerButton.style.display = "block";
+
 
   // Add event listener for logonButton to show the login form
   logonButton.addEventListener("click", (e) => {
     e.preventDefault()
     if (inputEnabled) {
       showLogin();
+      handleLogin();
+    }
+  });
+
+  registerButton.addEventListener("click", (e) => {
+    e.preventDefault();
+    if (inputEnabled) {
+      showRegister();
+      handleRegister();
     }
   });
 
@@ -58,12 +76,19 @@ logonSubmit.addEventListener("click", async (e) => {
   setDiv(loginDiv);
   enableInput(false);
 
+  message.textContent = "";
+
+  equipmentDiv.style.display = "none";
+  addEquipmentDiv.style.display = "none";
+  logonForm.style.display = "block";
+  logonSubmit.style.display = "none";
+  logonCancel.style.display = "none";
+
   const emailValue = email.value;
   const passwordValue = password.value;
   const roleValue = userRole || roleInput.value;
 
   console.log("📩 Email:", emailValue)
-  console.log("🔑 Password:", passwordValue)
   console.log("👤 Role:", roleValue)
 
 if (!emailValue || !passwordValue || !roleValue) {
@@ -95,48 +120,70 @@ if (!emailValue || !passwordValue || !roleValue) {
       return;
     }
       console.log('Login Successful:', data.user.name)
+      
+      loginDiv.style.display = "none";
+      setDiv(logonRegisterDiv);
       setToken(data.token);
       message.textContent = `Logon successful. Welcome ${data.user.name}`;
 
       console.log('Showing View Equip. Button')
-      viewAllEquipmentButton.style.display = "block"; 
+      viewAllEquipmentButton.style.display = "block";
 
     if (data.user.role === 'admin' || data.user.role === 'staff') {
       console.log('Showing Add Equip. Button')
       addEquipmentButton.style.display = "block";
+    } else {
+      console.log('Hiding Add Equip. Button')
+      addEquipmentButton.style.display = "none";
     }
-    console.log('Showing Equipment')
-      showEquipment();
-    } catch (err) {
-      console.error("Error Logging In", err);
-      message.textContent = "Error Logging In";
-    }
-    enableInput(true);
-  })
+  } catch (err) {
+    console.error("Error Logging In", err);
+    message.textContent = "Error Logging In";
+  }
+  
+  enableInput(true);
 
+})
 })
 
 export const showLogin = () => {
-  const logonSubmit = document.getElementById("logon-submit");
+  const logonButton = document.getElementById("logon-button");
   const logonCancel = document.getElementById("logon-cancel");
+  const equipmentDiv = document.getElementById("equipment-div");
+  const addEquipmentDiv = document.getElementById("add-equipment-div");
+  const email = document.getElementById("email");
+  const password = document.getElementById("password");
+  const loginDiv = document.getElementById("logon-div");
 
   if (email && password) {
     email.value = "";
     password.value = "";
   }
+
   setDiv(loginDiv);
-  logonSubmit.style.display = "block";
+  enableInput(true);
+
+  message.textContent = "";
+
+  logonButton.style.display = "block";
   logonCancel.style.display = "block";
+  equipmentDiv.style.display = "none";
+  addEquipmentDiv.style.display = "none";
 }
 
 
 export const handleLogin = () => {
   enableInput(true);
   const logonButton = document.getElementById("logon-button");
+  const logonSubmit = document.getElementById("logon-submit");
   const logonForm = document.getElementById("logon-form");
   const viewAllEquipmentButton = document.getElementById("view-all-equipment");
+  const message = document.getElementById("message");
+  const equipmentDiv = document.getElementById("equipment-div");
 
   setDiv(loginDiv);
+
+  equipmentDiv.style.display = "none";
   logonForm.style.display = "block";
   viewAllEquipmentButton.style.display = "none";
   message.textContent = "";
@@ -149,5 +196,13 @@ export const handleLogin = () => {
     }
   })
 
+
   // Add event listener for logonForm submit
+  logonSubmit.addEventListener("click", async (e) => {
+    e.preventDefault(); 
+    if (inputEnabled) {
+      await handleLogin();
+      viewAllEquipmentButton.style.display = "block";
+    }
+  })
 }
