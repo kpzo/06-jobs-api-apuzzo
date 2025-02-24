@@ -18,7 +18,7 @@
   <hr />
 
   <!-- Authentication Buttons -->
-  <div id="logon-register">
+  <div id="logon-register-div">
     <p>Login or Register</p>
     <button type="button" id="logon-button">Log in</button>
     <button type="button" id="register-button">Register</button>
@@ -27,7 +27,7 @@
   <!-- Login Form -->
   <div id="logon-div" style="display: none;">
     <p>Log in to view equipment.</p>
-    <form id="logon-form">
+    <form id="logon-form" onsubmit="return false;">
       <label for="email">Email:</label>
       <input type="email" id="email" required />
 
@@ -49,8 +49,8 @@
 
   <!-- Registration Form -->
   <div id="register-div" style="display: none;">
-    <p>Register to view equipment.</p>
-    <form id="register-form">
+    <p>Register to login.</p>
+    <form id="register-form" onsubmit="return false;">
       <label for="name">Name:</label>
       <input type="text" id="name" required />
 
@@ -63,7 +63,7 @@
       <label for="password2">Verify Password:</label>
       <input type="password" id="password2" required />
 
-      <button id="register-submit-button" type="submit">Register Now</button>
+      <button id="register-now-button" type="submit">Register Now</button>
       <button type="button" id="register-cancel">Cancel</button>
     </form>
     <button id="view-equipment-from-register">View Equipment</button>
@@ -130,7 +130,7 @@
     </form>
     <div id="successMessage">Equipment updated successfully.</div>
     <div id="unauthMessage">You must be staff or admin to access</div>
-  </div>
+</div>
 
   <script src="/index.js" type="module"></script>
 

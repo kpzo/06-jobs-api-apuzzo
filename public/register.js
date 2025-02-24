@@ -7,7 +7,6 @@ import {
 } from "./index.js";
 import { showLoginRegister } from "./loginRegister.js";
 import { showEquipment } from "./equipment.js";
-
 let registerDiv = null;
 let name = null;
 let email1 = null;
@@ -20,10 +19,12 @@ export const handleRegister = () => {
   email1 = document.getElementById("email1");
   password1 = document.getElementById("password1");
   password2 = document.getElementById("password2");
-  const registerNowButton = document.getElementById("register-submit-button");
+  const registerNowButton = document.getElementById("register-now-button");
   const registerCancel = document.getElementById("register-cancel");
 
-  registerNowButton.addEventListener("click", async (e) => {
+  enableInput(true);
+
+  registerNowButton.addEventListener("submit", async (e) => {
     if (inputEnabled) {
         if (password1.value != password2.value) {
           message.textContent = "The passwords entered do not match.";
@@ -42,6 +43,8 @@ export const handleRegister = () => {
                 password: password1.value,
               }),
             });
+            
+            console.log('fetch response registerNowButton', response)
 
             const data = await response.json();
             if (response.status === 201) {
@@ -62,7 +65,6 @@ export const handleRegister = () => {
             message.textContent = "A communications error occurred.";
           }
 
-          enableInput(true);
         }
       }
         name.value = "";
@@ -80,16 +82,18 @@ export const handleRegister = () => {
 };
 
 export const showRegister = () => {
-  email1.value = null;
-  password1.value = null;
-  password2.value = null;
   setDiv(registerDiv);
   
-  const registerNowButton = document.getElementById("register-submit-button");
-  const registerCancel = document.getElementById("register-cancel");
-
+  enableInput(true);
 
   message.textContent = ""; 
   registerNowButton.style.display = "block";
   registerCancel.style.display = "block";
-  registerDiv.style.display = "block";};
+  registerDiv.style.display = "block";
+  
+  registerNowButton.addEventListener("click", (e) => {
+    e.preventDefault();
+    handleRegister();
+  });
+showRegister();
+};

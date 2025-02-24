@@ -1,11 +1,12 @@
-import { inputEnabled, setDiv } from "./index.js";
+import { enableInput, inputEnabled, setDiv } from "./index.js";
 import { showLogin } from "./login.js";
 import { showRegister } from "./register.js";
 
-let loginRegisterDiv = null;
+const loginRegisterDiv = document.getElementById("logon-register-div");
+
 
 export const handleLoginRegister = () => {
-  loginRegisterDiv = document.getElementById("logon-register");
+  enableInput(true);
   const login = document.getElementById("logon-button");
   const register = document.getElementById("register-button");
 
@@ -23,6 +24,14 @@ export const handleLoginRegister = () => {
 export const showLoginRegister = () => {
   if (loginRegisterDiv) {
     setDiv(loginRegisterDiv);
+    loginRegisterDiv.style.display = "block";
+    enableInput(true);
+
+    const login = document.getElementById("logon-button");
+    const register = document.getElementById("register-button");
+
+    login.addEventListener("click", showLogin);
+    register.addEventListener("click", showRegister);
   } else {
     console.error("Login/Register div is not initialized.");
   }

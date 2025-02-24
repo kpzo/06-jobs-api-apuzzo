@@ -1,4 +1,4 @@
-const { StatusCodes } = require("http-status-codes");
+
 const { BadRequestError } = require("../errors");
 
 const checkRole = (req, res, next) => {

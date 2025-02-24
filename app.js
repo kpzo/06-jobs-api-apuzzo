@@ -21,9 +21,6 @@ const authRouter = require('./routes/auth');
 const equipmentRouter = require('./routes/equipment');
 
 
-
-
-
 // set security middleware
 app.set('trust proxy', 1);
 app.use(rateLimiter({

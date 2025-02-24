@@ -6,8 +6,11 @@ import {
   token,
   enableInput,
 } from "./index.js";
-import { showLoginRegister } from "./loginRegister.js";
 import { showAddEdit } from "./addEdit.js";
+import { showLoginRegister, handleLoginRegister } from "./loginRegister.js";
+import { handleLogin, showLogin } from "./login.js";
+import { handleAddEdit } from "./addEdit.js";
+import { handleRegister, showRegister } from "./register.js";
 
 let equipmentDiv = null;
 let equipmentTable = null;
@@ -47,26 +50,51 @@ export const showEquipment = () => {
   showEquipment();
 };
 
+document.addEventListener('DOMContentLoaded', () => {
+  const logonButton = document.getElementById('logon-button');
+  const registerButton = document.getElementById('register-button');
+  const logonDiv = document.getElementById('logon-div');
+  const registerDiv = document.getElementById('register-div');
+  const logonCancelButton = document.getElementById('logon-cancel');
+  const registerCancelButton = document.getElementById('register-cancel');
+  const equipmentDiv = document.getElementById('equipment');
+  const editEquipmentDiv = document.getElementById('edit-equipment');  
+  const viewAllEquipmentButton = document.getElementById('view-all-equipment');
+  const message = document.getElementById('message');
+
+  logonButton.addEventListener('click', () => {
+      logonDiv.style.display = 'block';
+      registerDiv.style.display = 'none';
+      equipmentDiv.style.display = 'none';
+      editEquipmentDiv.style.display = 'none';
+      showLogin(); // Calls the function to render equipment dynamically
+  });
+
+  registerButton.addEventListener('click', () => {
+      registerDiv.style.display = 'block';
+      logonDiv.style.display = 'none';
+      equipmentDiv.style.display = 'none';
+      editEquipmentDiv.style.display = 'none';
+  });
+
+  logonCancelButton.addEventListener('click', () => {
+      logonDiv.style.display = 'none';
+  });
+
+  registerCancelButton.addEventListener('click', () => {
+      registerDiv.style.display = 'none';
+      showLoginRegister();
+  });
 
 
-// const handleLogoff = () => {
-//   setToken(null);
-//   if (message) message.textContent = "You have been logged off.";
-//   equipmentTable.replaceChildren([equipmentTableHeader]);
-//   showLoginRegister();
-// };
+  const addEquipmentButton = document.getElementById('add-equipment');
+    addEquipmentButton.addEventListener('click', (e) => {
+      e.preventDefault();
+      showAddEquipmentForm();
+  });
+});
 
 
-//   if (response.status === 401) {
-//     const unauthMessage = document.getElementById("unauthMessage");
-//     if (unauthMessage) {
-//       unauthMessage.style.display = "block";
-//       unauthMessage.textContent = "Unauthorized access. Please log in.";
-//     } else {
-//       console.warn("Warning: 'unauthMessage' element not found.");
-//     }
-//     return;
-//   }
   
 // const equipmentDiv = document.getElementById('equipment')
 

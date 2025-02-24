@@ -26,7 +26,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const logonCancel = document.getElementById("logon-cancel");
   const viewEquipmentButton = document.getElementById("view-equipment");
 
-  enableInput(true);
 
   // Add event listener for logonButton to show the login form
   logonButton.addEventListener("click", (e) => {
@@ -37,7 +36,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   logonCancel.addEventListener("click", (e) => {
-    e.preventDefault()
+    e.preventDefault();
     if (inputEnabled) {
       logonForm.reset(); // Reset entire form instead of clearing fields
       showLoginRegister();
@@ -48,7 +47,9 @@ document.addEventListener("DOMContentLoaded", () => {
   logonSubmit.addEventListener("click", async (e) => {
     e.preventDefault()
     const emailValue = email.value;
-    const passwordValue = password.value;
+    const passwordValue = token;
+
+    enableInput(true);
 
     console.log("📩 Email:", emailValue);
 
