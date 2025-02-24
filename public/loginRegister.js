@@ -1,4 +1,4 @@
-
+// Purpose: Handle login and register events and show login and register forms.
 import { enableInput, inputEnabled, setDiv } from "./index.js";
 import { showLogin, handleLogin } from "./login.js";
 import { showRegister, handleRegister } from "./register.js";
@@ -13,6 +13,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const addEquipmentDiv = document.getElementById("add-equipment-div");
   const logonButton = document.getElementById("logon-button");
   const registerButton = document.getElementById("register-button");
+  const viewEquipmentAfterLoginButton = document.getElementById("view-equipment-after-login-button");
+  const viewAllEquipmentButton = document.getElementById("view-all-equipment-button");
+  const goBackButton = document.getElementById("go-back-button");
   const user = JSON.parse(localStorage.getItem("user"));
   const userRole = user ? user.role : null;
   const roleInput = document.getElementById("role");
@@ -20,6 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
   setDiv(loginRegisterDiv);
+
   loginDiv.style.display = "none";
   registerDiv.style.display = "none";
   equipmentDiv.style.display = "none";
@@ -27,24 +31,26 @@ document.addEventListener("DOMContentLoaded", () => {
   addEquipmentDiv.style.display = "none";
   logonButton.style.display = "block";
   registerButton.style.display = "block";
+  viewEquipmentAfterLoginButton.style.display = "none";
+  viewAllEquipmentButton.style.display = "none";
+  goBackButton.style.display = "block";
 
   showLoginRegister();
 
 });
 
 export const handleLoginRegister = () => {
+  const loginRegisterDiv = document.getElementById("logon-register-div");
+  const logonButton = document.getElementById("logon-button");
+  const registerButton = document.getElementById("register-button");
 
   enableInput(true);
   setDiv(loginRegisterDiv);
 
   logonButton.addEventListener("click", (e) => {
-    if (inputEnabled && e.target.nodeName === "BUTTON") {
-      if (e.target === logonButton) {
-        showLogin();
-        handleLogin();
-      } else if (e.target === registerButton) {
-        showRegister();
-      }
+    e.preventDefault();
+    if (inputEnabled) {
+      showLogin();
     }
   });
 
@@ -52,7 +58,6 @@ export const handleLoginRegister = () => {
     e.preventDefault();
     if (inputEnabled) {
       showRegister();
-      handleRegister();
     }
   });
 };
@@ -61,7 +66,12 @@ export const showLoginRegister = () => {
   const loginRegisterDiv = document.getElementById("logon-register-div");
   const logonButton = document.getElementById("logon-button");
   const registerButton = document.getElementById("register-button");
+  const logonDiv = document.getElementById("logon-div");
+  const registerDiv = document.getElementById("register-div");
+
   setDiv(loginRegisterDiv);
+  logonDiv.style.display = "none";
+  registerDiv.style.display = "none";
   enableInput(true);
 
     logonButton.style.display = "block";

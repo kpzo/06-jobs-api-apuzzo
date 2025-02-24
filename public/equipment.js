@@ -8,7 +8,6 @@ import {
 } from "./index.js";
 
 import { showAddEdit } from "./addEdit.js";
-import { showLogin } from "./login.js";
 import { showLoginRegister } from "./loginRegister.js";
 
 const API_URL = "http://localhost:5000/api/v1";
@@ -68,7 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const registerCancelButton = document.getElementById('register-cancel');
   const equipmentDiv = document.getElementById('equipment-div');
   const editEquipmentDiv = document.getElementById('edit-equipment-div');  
-  const viewAllEquipmentButton = document.getElementById('view-all-equipment');
+  const viewAllEquipmentButton = document.getElementById('view-all-equipment-button');
   const message = document.getElementById('message');
   const unauthMessage = document.getElementById('unauth-message');
   const submitUpdate = document.getElementById('submit-update');
@@ -80,9 +79,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const addEquipmentButton = document.getElementById('add-equipment-button');
 
   logonButton.addEventListener('click', () => {
-      logonDiv.style.display = 'none';
+      logonDiv.style.display = 'block';
       registerDiv.style.display = 'none';
-      equipmentDiv.style.display = 'block';
       editEquipmentDiv.style.display = 'none';
   });
 
@@ -123,6 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
       },
       body: JSON.stringify(data),
     });
+
     if (response.ok) {
       const { equipment } = await response.json();
       updateEquipmentTable(equipment);
@@ -214,11 +213,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     showEditForm();
   });
-})
-  
-  export async function fetchAndDisplayEquipment() {
-    console.log("🔹 Fetching equipment data...");
-    const authToken = token; // Store token in variable to avoid multiple calls
+});
+
+export const fetchAndDisplayEquipment = async () => {
+  console.log("🔹 Fetching equipment data...");  
+  const authToken = token; // Store token in variable to avoid multiple calls
   
     try {
       const response = await fetch(`${API_URL}/equipment`, {
@@ -261,7 +260,8 @@ document.addEventListener('DOMContentLoaded', () => {
     console.error("Error fetching equipment:", error);
     document.getElementById("message").textContent = "Error loading equipment.";
   }
-}  
+} 
+
   export function updateEquipmentTable(equipment) {
     const equipmentTable = document.getElementById('equipment-table');
     const message = document.getElementById('message');
@@ -294,7 +294,6 @@ document.addEventListener('DOMContentLoaded', () => {
       equipmentTable.appendChild(row);
     });
   }
-
 
   export const showEquipment = () => {
     const equipmentDiv = document.getElementById("equipment-div");

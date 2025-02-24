@@ -42,6 +42,7 @@ export const handleRegister = () => {
                 name: name.value,
                 email: email1.value,
                 password: password1.value,
+                role: role.default,
               }),
             });
             
