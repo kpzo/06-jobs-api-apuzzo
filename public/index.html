@@ -71,6 +71,11 @@
       <label for="password2">Verify Password:</label>
       <input type="password" id="password2" required />
 
+      <label for="registrationRole">Role:</label>
+      <select id="registrationRole" required>
+        <option value="user" selected>Default User</option>
+      </select>
+
       <button id="register-now-button" type="submit">Register Now</button>
       <button type="button" id="register-cancel">Cancel</button>
     </form>
@@ -179,12 +184,14 @@
 
     <label for="add-remarks">Remarks:</label>
     <textarea id="add-remarks"></textarea>
-    <button type="button" id="back-to-all-equipment">Back To All Equipment</button>
     <button type="submit" id="submit-add">Add</button>
+
+    <button type="button" id="back-to-all-equipment">Back To All Equipment</button>
     <button type="button" id="add-cancel">Cancel</button>
     <button type="button" id="go-back-button">Go Back</button>
+</form>
+</div>
 
-  </form>
   <script src="/index.js" type="module"></script>
 
 </body>

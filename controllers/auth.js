@@ -3,12 +3,19 @@ const router = express.Router();
 const { StatusCodes } = require('http-status-codes');
 const User = require('../models/User');
 const { BadRequestError, UnauthenticatedError } = require('../errors');
+const { setToken } = require('../public');
+
+
+
+const user = JSON.parse(localStorage.getItem("user"));
 
 // Register user
 const register = async (req, res) => {
   const user = await User.create({ ...req.body });
+  const userRole = user.role || "guest";
   const token = user.createJWT();
-  res.status(StatusCodes.CREATED).json({ user: { name: user.name }, token });
+  setToken(token); // updated to use the created token
+  res.status(StatusCodes.CREATED).json({ user: { id: user.id, name: user.name }, token, role: userRole });
 };
 
 // Login user
@@ -55,13 +62,7 @@ const login = async (req, res) => {
 };
 
 
-// Protected route example
-const getProfile = async (req, res) => {
-  res.status(StatusCodes.OK).json({ user: req.user });
-};
-
 module.exports = {
   register,
   login,
-  getProfile,
 };

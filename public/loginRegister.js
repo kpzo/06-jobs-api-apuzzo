@@ -1,7 +1,7 @@
-// Purpose: Handle login and register events and show login and register forms.
+// Purpose:  show login and register forms.
 import { enableInput, inputEnabled, setDiv } from "./index.js";
-import { showLogin, handleLogin } from "./login.js";
-import { showRegister, handleRegister } from "./register.js";
+import { showLogin  } from "./login.js";
+import { showRegister  } from "./register.js";
 
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -20,7 +20,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const userRole = user ? user.role : null;
   const roleInput = document.getElementById("role");
   roleInput.value = userRole;
-
 
   setDiv(loginRegisterDiv);
 

@@ -7,7 +7,7 @@ import {
   enableInput,
 } from "./index.js";
 
-import { showAddEdit } from "./addEdit.js";
+import { handleAddEdit } from "./addEdit.js";
 import { showLoginRegister } from "./loginRegister.js";
 
 const API_URL = "http://localhost:5000/api/v1";
@@ -46,7 +46,7 @@ export const handleEquipment = async () => {
     fetchAndDisplayEquipment();
     if (inputEnabled && e.target.nodeName === "BUTTON") {
       if (e.target === addEquipment) {
-        showAddEdit(null);
+        handleAddEdit(null);
       } else if (e.target === logoff) {
         setToken(null);
         message.textContent = "You have been logged off.";
@@ -234,14 +234,17 @@ export const fetchAndDisplayEquipment = async () => {
     }
   }
 
-  export async function showAddEquipmentForm() {
-    const editForm = document.getElementById('edit-form');
-    editForm.reset(); // Clear any existing values in the form
   
-    const equipmentDiv = document.getElementById('equipment-div');
-    const editEquipmentDiv = document.getElementById('edit-equipment-div');
+export async function showAddEquipmentForm() {
+
+    const addEquipmentForm = document.getElementById('add-equipment-form');
+    addEquipmentForm.reset(); // Clear any existing values in the form
+  
+    const equipmentDiv = document.getElementById('add-equipment-div');
+    const addEquipmentDiv = document.getElementById('add-equipment-div');
     equipmentDiv.style.display = 'none';
-    editEquipmentDiv.style.display = 'block';
+    addEquipmentDiv.style.display = 'block';
+    addEquipmentForm.style.display = 'block';
     const id = e.target.getAttribute('data-id');
 
  try {
@@ -253,7 +256,7 @@ export const fetchAndDisplayEquipment = async () => {
     if (!response.ok) throw new Error("Failed to fetch equipment");
 
     const { equipment } = await response.json();
-    showEditForm(equipment);
+    handleAddEdit(equipment);
   }
   catch (error) {
     console.error("Error fetching equipment:", error);
