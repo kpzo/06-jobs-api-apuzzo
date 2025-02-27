@@ -1,9 +1,8 @@
 
 import { enableInput, inputEnabled, message, setDiv, token } from "./index.js";
-import { showEquipment, fetchAndDisplayEquipment } from "./equipment.js";
+import { showEquipment, fetchAndDisplayEquipment, addEquipment } from "./equipment.js";
 import { showWelcome } from "./welcome.js";
 
-let editEquipmentDiv = null;
 let brand = null;
 let status = null;
 let mount = null;
@@ -12,29 +11,27 @@ let aperture = null;
 let version = null;
 let serialNumber = null;
 let updatedBy = null;
-let addEquipmentDiv = null;
 
-export const handleAddEdit = () => {
-  editEquipmentDiv = document.getElementById("edit-equipment-div");
-  addEquipmentDiv = document.getElementById("add-equipment-div");
-  brand = document.getElementById("brand");
-  mount = document.getElementById("mount");
-  focalLength = document.getElementById("focal-length");
-  aperture = document.getElementById("aperture");
-  version = document.getElementById("version");
-  serialNumber = document.getElementById("serial-number");
-  updatedBy = document.getElementById("updated-by");
-  status = document.getElementById("status");
-  const editButton = document.getElementById("edit-button");
-  const deleteButton = document.getElementById("delete-button");
-  const goBackButton = document.getElementById("go-back-button");
-  const editCancel = document.getElementById("edit-cancel");
 
 document.addEventListener("DOMContentLoaded", () => {
-  addEquipmentDiv.addEventListener("click", async (e) => {
+const welcomeAddEquipmentButton = document.getElementById("add-equipment-after-login-button");
+const addEquipmentDiv = document.getElementById("add-equipment-div");
+const welcomeDiv = document.getElementById("welcome-div");
+const goBackButton = document.getElementById("go-back-button");
+const user = JSON.parse(localStorage.getItem("user"));
+const editCancel = document.getElementById("edit-cancel-button");
+
+  window.addEventListener("beforeunload", () => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (user) {
+      localStorage.setItem("user", JSON.stringify(user));  // ✅ Resave user info
+    }
+  });
+
+  welcomeAddEquipmentButton.addEventListener("click", async (e) => {
     if (inputEnabled && e.target.nodeName === "BUTTON") {
       if (e.target === addEquipmentDiv) {
-        enableInput(false);
+        enableInput(true);
 
         let method = "POST";
         let url = "/api/v1/equipment";
@@ -82,57 +79,84 @@ document.addEventListener("DOMContentLoaded", () => {
         message.textContent = "";
         showEquipment();
       }
+      addEquipment()
     }
   });
 
+
   goBackButton.addEventListener("click", (e) => {
     e.preventDefault();
-    setDiv(showWelcome);
+    setDiv(welcomeDiv);
+    showWelcome();
   });
 
-    editButton.addEventListener('click', () => {
-      if (state.userRole === "admin" || state.userRole === "staff") {
-        showEditForm(item);
-          } else {
-        alert("You must be an admin or staff to edit equipment.");
-          }
-    });
+  addEquipmentDiv.addEventListener("click", async (e) => {
+    if (inputEnabled && e.target.nodeName === "BUTTON") {
+      enableInput(false);
+    }
+  });
+})
 
-    deleteButton.addEventListener('click', async () => {
+  document.addEventListener("click", async (e) => {
+    if (e.target && e.target.id === "edit-button") {
+      if (state.userRole === "admin" || state.userRole === "staff") {
+        showEditForm();
+      } else {
+        alert("You must be an admin or staff to edit equipment.");
+      }
+    }
+  
+    if (e.target && e.target.id === "delete-button") {
       if (state.userRole === "admin" || state.userRole === "staff") {
         const confirmed = confirm("Are you sure you want to delete this equipment?");
-      if (confirmed) {
-        try {
-          const response = await fetch(`${API_URL}/equipment/${item._id}`, {
-            method: "DELETE",
-            headers: {
-              Authorization: `Bearer ${state.token}`,
-            },
-          });
-                if (!response.ok) throw new Error("Failed to delete equipment");
+        if (confirmed) {
+          try {
+            const response = await fetch(`${API_URL}/equipment/${item._id}`, {
+              method: "DELETE",
+              headers: { Authorization: `Bearer ${token()}` },
+            });
+  
+            if (!response.ok) throw new Error("Failed to delete equipment");
+            fetchAndDisplayEquipment();
+          } catch (error) {
+            console.error("❌ Error deleting equipment:", error);
+            document.getElementById("equipment-message").textContent = "Error deleting equipment.";
+          }
+        }
+      } else {
+        alert("You must be an admin or staff to delete equipment.");
+      }
+    }
+  });
 
-                const { message } = await response.json();
-                console.log("🗑️", message);
-                fetchAndDisplayEquipment();
-                } catch (error) {
-                console.error("❌ Error deleting equipment:", error);
-                document.getElementById('equipment-message').textContent = "Error deleting equipment.";
-                }
-            }
-            } else {
-            alert("You must be an admin or staff to delete equipment.");
-            }
-        })
-});
 
-}
+export const showAddEquipmentForm = () => {
+  console.log("Showing add equipment form...");
 
-export const showAddEquipmentForm = (equipment) => {
+  const addEquipmentDiv = document.getElementById("add-equipment-div");  
+  const addEquipmentForm = document.getElementById("add-equipment-form");
+  const equipmentDiv = document.getElementById("equipment-div");
+
+  addEquipmentDiv.style.display = "block";
+  equipmentDiv.style.display = "none";
+  addEquipmentForm.style.display = "block";
+
+  addEquipmentForm.reset();
   message.textContent = "";
-  setDiv(addEquipmentDiv);
 };
 
+
 export const showEditForm = (equipment) => {
+  const editEquipmentDiv = document.getElementById("edit-equipment-div");
+  document.getElementById("edit-brand").value = equipment.brand;
+  document.getElementById("edit-mount").value = equipment.mount;
+  document.getElementById("edit-focal-length").value = equipment.focalLength;
+  document.getElementById("edit-aperture").value = equipment.aperture;
+  document.getElementById("edit-version").value = equipment.version;
+  document.getElementById("edit-serial-number").value = equipment.serialNumber;
+  document.getElementById("edit-updated-by").value = equipment.updatedBy;
+  document.getElementById("edit-status").value = equipment.status;
+  const editForm = document.getElementById("edit-form");
   message.textContent = "";
   addEditDiv.addEventListener("click", async (e) => {
     if (!inputEnabled || e.target.nodeName !== "BUTTON") return;
@@ -142,6 +166,9 @@ export const showEditForm = (equipment) => {
         alert("You must be an admin or staff to add equipment.");
         return;
       }
+
+      setDiv(editEquipmentDiv);
+      enableInput(true);
 
       enableInput(false);
 

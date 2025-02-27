@@ -36,7 +36,6 @@ export const formatDate = (dateString) => {
 export const handleLogoff = () => {
   setToken(null);
     if (message) message.textContent = "You have been logged off.";
-    equipmentTable.replaceChildren([equipmentTableHeader]);
     showLoginRegister();
 };
 
@@ -50,6 +49,14 @@ import { handleLoginRegister, showLoginRegister } from "./loginRegister.js";
 
 document.addEventListener("DOMContentLoaded", (e) => {
   e.preventDefault();
+
+  window.addEventListener("beforeunload", () => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (user) {
+      localStorage.setItem("user", JSON.stringify(user));  // ✅ Resave user info
+    }
+  });
+  
   token = localStorage.getItem("token");
   message = document.getElementById("message");
   role = localStorage.getItem("role");

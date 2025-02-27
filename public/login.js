@@ -10,9 +10,6 @@ import { showLoginRegister } from "./loginRegister.js";
 import { showRegister } from "./register.js";
 import { showWelcome } from "./welcome.js";
 
-let loginDiv = null; 
-let role = null;
-
 document.addEventListener("DOMContentLoaded", async () => {
   const loginRegisterDiv = document.getElementById("logon-register-div");
   const logonForm = document.getElementById("logon-form");
@@ -38,16 +35,31 @@ document.addEventListener("DOMContentLoaded", async () => {
   registerNowButton.style.display = "block";
   goBackButton.style.display = "block";
 
-  setDiv(loginRegisterDiv);
+  if(!localStorage.getItem('token')) {
+    setDiv(loginRegisterDiv);
+  }
   enableInput(true);
+
+  window.addEventListener("beforeunload", () => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (user) {
+      localStorage.setItem("user", JSON.stringify(user));  // ✅ Resave user info
+    }
+  });
 
   // Add event listener for goBackButton to return to the previous view
   goBackButton.addEventListener("click", (e) => {
     e.preventDefault();
-    if (inputEnabled) {
-      showLogin();
+    const addEquipmentDiv = document.getElementById("add-equipment-div");
+    const welcomeDiv = document.getElementById("welcome-div");
+
+    if (addEquipmentDiv.style.display === "block") {
+        setDiv(welcomeDiv);
+        showWelcome();
+    } else {
+        showLogin();
     }
-  });
+});
 
 registerButton.addEventListener("click", (e) => {
   e.preventDefault();
@@ -151,6 +163,9 @@ export const showLogin = () => {
   loginSubmit.style.display = "block";
   logonCancel.style.display = "block";
   equipmentDiv.style.display = "none";
-  addEquipmentDiv.style.display = "none";
   logonCancel.style.display = "block";
+
+  if (loginDiv.style.display === "block") {
+    addEquipmentDiv.style.display = "none";
+  }
 }

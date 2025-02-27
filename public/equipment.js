@@ -1,3 +1,4 @@
+// Purpose: JavaScript for equipment page.
 import {
   inputEnabled,
   setDiv,
@@ -5,59 +6,78 @@ import {
   setToken,
   token,
   enableInput,
+  handleLogoff,
 } from "./index.js";
 
 import { showLoginRegister } from "./loginRegister.js";
 import { showWelcome } from "./welcome.js";
+import { showAddEquipmentForm } from "./addEdit.js";
 
 const API_URL = "http://localhost:5000/api/v1";
 
 let equipmentDiv, equipmentTable;
 
 document.addEventListener("DOMContentLoaded", () => {
+
+  window.addEventListener("beforeunload", () => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (user) {
+      localStorage.setItem("user", JSON.stringify(user));  // ✅ Resave user info
+    }
+  });
+
+  enableInput(true);
   if (token) {
     showWelcome();
+    showAddEquipmentForm();
+    showEquipment();
   }
   else {
     showLoginRegister();
   }
-  document.getElementById("add-equipment-div").style.display = "none";
+  setupEventListeners();
 });
 
 export async function showEquipment() {
   equipmentDiv = document.getElementById("equipment-div");
   equipmentTable = document.getElementById("equipment-table");
 
+  if(addEquipmentDiv.style.display !== "block") {
+    setDiv(equipmentDiv);
+  }
   setupEventListeners();
   await fetchAndDisplayEquipment();
+
 }
 
+let eventListenerSet = false;
+
 export function setupEventListeners() {
+  if (eventListenerSet) return;
+  eventListenerSet = true;
+  
   document.getElementById("view-all-equipment-button").addEventListener("click", (e) => {
     e.preventDefault();
     fetchAndDisplayEquipment();
   });
 
-  document.getElementById("logoff-button").addEventListener("click", () => {
-    setToken(null);
-    message.textContent = "You have been logged off.";
+  document.getElementById("logoff-from-equipment-button").addEventListener("click", () => {
     showLoginRegister();
+    handleLogoff();
   });
-
-  document.getElementById("add-equipment-button").addEventListener("click", showAddEquipmentForm);
 
   document.getElementById("edit-equipment-button").addEventListener("click", showEditForm);
 }
 
 export async function addEquipment() {
-  const brand = document.getElementById("brand").value;
-  const mount = document.getElementById("mount").value;
-  const focalLength = document.getElementById("focal-length").value;
-  const aperture = document.getElementById("aperture").value;
-  const version = document.getElementById("version").value;
-  const serialNumber = document.getElementById("serial-number").value;
-  const updatedBy = document.getElementById("updated-by").value;
-  const status = document.getElementById("status").value;
+  const brand = document.getElementById("add-brand").value;
+  const mount = document.getElementById("add-mount").value;
+  const focalLength = document.getElementById("add-focal-length").value;
+  const aperture = document.getElementById("add-aperture").value;
+  const version = document.getElementById("add-version").value;
+  const serialNumber = document.getElementById("add-serial-number").value;
+  const updatedBy = document.getElementById("add-updated-by").value;
+  const status = document.getElementById("add-status").value;
 
   if (!brand || !mount || !focalLength || !aperture || !version || !serialNumber || !updatedBy || !status) {
     message.textContent = "All fields are required.";
@@ -166,21 +186,4 @@ export async function showEditForm(item) {
   });
   
   document.getElementById("edit-equipment-div").style.display = "block";
-}
-
-export async function showAddEquipmentForm() {
-  document.getElementById("add-equipment-div").style.display = "block";
-  
-  const equipmentDiv = document.getElementById("equipment-div");
-  equipmentDiv.style.display = "none";
-  
-  const message = document.getElementById("message");
-  message.textContent = "";
-  
-
-  const formFields = ['brand', 'mount', 'focalLength', 'aperture', 'version', 'serialNumber', 'status'];
-  formFields.forEach(field => {
-    const input = document.getElementById(`add-${field}`);
-    if (input) input.value = '';
-  });
 }

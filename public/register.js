@@ -27,6 +27,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
   handleRegister();
 
+  window.addEventListener("beforeunload", () => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (user) {
+      localStorage.setItem("user", JSON.stringify(user));  // ✅ Resave user info
+    }
+  });
+
   registerNowButton.addEventListener("click", async (e) => {
     e.preventDefault();  
 
