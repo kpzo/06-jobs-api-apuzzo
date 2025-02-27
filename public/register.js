@@ -1,3 +1,4 @@
+
 import {
   inputEnabled,
   setDiv,
@@ -23,7 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
   password1 = document.getElementById("password1");
   password2 = document.getElementById("password2");
   roleInput = document.getElementById("registrationRole");
-  
+
   handleRegister();
 
   registerNowButton.addEventListener("click", async (e) => {
@@ -51,19 +52,20 @@ document.addEventListener("DOMContentLoaded", () => {
             name: name.value,
             email: email1.value,
             password: password1.value,
-            role: roleInput.value          
-          }),
-        })
+            role: roleInput.value,          
+          })
+        });
             
         
       const data = await response.json();
+
 
         console.log('fetch response registerNowButton', response)
         console.log('fetch data registerNowButton', data)
 
         if (response.status === 201) {
           message.textContent = `Registration successful.  Welcome ${data.user.name}`;
-          setToken(token);
+          setToken(data.token);
 
           name.value = "";
           email1.value = "";
@@ -90,14 +92,16 @@ export const showRegister = () => {
 
   const registerCancel = document.getElementById("register-cancel");;
   const registerNowButton = document.getElementById("register-now-button");
+  const equipmentDiv = document.getElementById("equipment-div");
 
-  setDiv(registerDiv);  
+
+  setDiv(registerDiv);
   enableInput(true);
 
   message.textContent = ""; 
   registerNowButton.style.display = "block";
   registerCancel.style.display = "block";
-  registerDiv.style.display = "block";
+  equipmentDiv.style.display = "none";
 }
 
 

@@ -1,4 +1,4 @@
-// Purpose:  show login and register forms.
+
 import { enableInput, inputEnabled, setDiv } from "./index.js";
 import { showLogin  } from "./login.js";
 import { showRegister  } from "./register.js";
@@ -22,6 +22,7 @@ document.addEventListener("DOMContentLoaded", () => {
   roleInput.value = userRole;
 
   setDiv(loginRegisterDiv);
+  enableInput(true)
 
   loginDiv.style.display = "none";
   registerDiv.style.display = "none";
@@ -34,7 +35,7 @@ document.addEventListener("DOMContentLoaded", () => {
   viewAllEquipmentButton.style.display = "none";
   goBackButton.style.display = "block";
 
-  showLoginRegister();
+  handleLoginRegister();
 
 });
 
@@ -45,6 +46,10 @@ export const handleLoginRegister = () => {
 
   enableInput(true);
   setDiv(loginRegisterDiv);
+  showLoginRegister();
+
+  logonButton.style.display = "block";
+  registerButton.style.display = "block";
 
   logonButton.addEventListener("click", (e) => {
     e.preventDefault();
@@ -66,13 +71,16 @@ export const showLoginRegister = () => {
   const logonButton = document.getElementById("logon-button");
   const registerButton = document.getElementById("register-button");
   const logonDiv = document.getElementById("logon-div");
+  const equipmentDiv = document.getElementById("equipment-div");
   const registerDiv = document.getElementById("register-div");
 
   setDiv(loginRegisterDiv);
   logonDiv.style.display = "none";
   registerDiv.style.display = "none";
-  enableInput(true);
+  equipmentDiv.style.display = "none";
+  enableInput(true)
 
-    logonButton.style.display = "block";
-    registerButton.style.display = "block"; 
+  logonButton.style.display = "block";
+  registerButton.style.display = "block"; 
+
 }

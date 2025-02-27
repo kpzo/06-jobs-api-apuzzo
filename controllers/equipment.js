@@ -35,13 +35,17 @@ const createEquipment = async (req, res) => {
 const updateEquipment = async (req, res) => {
     const {
         body: { status },
-        user: { userId },
+        user: { _id: userId },
         params: { id: equipmentId }
     } = req;
 
     if (status === 'pending') {
         throw new BadRequestError('Please locate equipment and update status');
     }
+    
+
+    req.body.updatedBy = userId;
+
     const equipment = await Equipment.findOneAndUpdate(
         { _id: equipmentId },
         req.body,

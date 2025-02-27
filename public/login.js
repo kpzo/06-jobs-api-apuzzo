@@ -10,11 +10,11 @@ import { showLoginRegister } from "./loginRegister.js";
 import { showRegister } from "./register.js";
 import { showWelcome } from "./welcome.js";
 
-let loginDiv = null;
+let loginDiv = null; 
+let role = null;
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   const loginRegisterDiv = document.getElementById("logon-register-div");
-  loginDiv = document.getElementById("logon-div");
   const logonForm = document.getElementById("logon-form");
   const logonSubmit = document.getElementById("logon-submit");
   const logonButton = document.getElementById("logon-button");
@@ -61,101 +61,64 @@ logonCancel.addEventListener("click", (e) => {
   if (inputEnabled) {
       logonForm.reset(); // Reset entire form instead of clearing fields
       showLoginRegister();
-  }
-})
-
-});
-
-// Reusable login function
-export const handleLogin = async (emailValue, passwordValue, roleValue) => {
-  const message = document.getElementById("message");
-  const equipmentDiv = document.getElementById("equipment-div");
-  const addEquipmentButton = document.getElementById("add-equipment-button");
-  const loginDiv = document.getElementById("logon-div");
-  const loginRegisterDiv = document.getElementById("logon-register-div");
-  const logonForm = document.getElementById("logon-form");
-  const logonSubmit = document.getElementById("logon-submit");
-  const email = document.getElementById("email");
-  const logonButton = document.getElementById("logon-button");
-  const password = document.getElementById("password");
-  const welcomeDiv = document.getElementById("welcome-div");
-  const welcomeViewEquipmentButton = document.getElementById("view-equipment-after-login-button");
-  const logoutFromWelcomeButton = document.getElementById("logout-from-welcome-button");
-  const welcomeAddEquipmentButton = document.getElementById("add-equipment-after-login-button");
-
-  if (!loginDiv) {
-    loginDiv = document.getElementById("logon-div");
-  }
-
-// Add event listener for logonButton to show the login form
-  logonButton.addEventListener("click", (e) => {
-    e.preventDefault();
-    setDiv(loginDiv);
-    if (inputEnabled) {
-      showLogin();
     }
   });
 
   logonSubmit.addEventListener("click", async (e) => {
+    const welcomeDiv = document.getElementById("welcome-div");
     e.preventDefault();
-    enableInput(false);
+    if (inputEnabled) {
+      await handleLogin();
+      setDiv(welcomeDiv);
+      showWelcome();
+    }
+  });
   
-    const emailValue = email.value;
-    const passwordValue = password.value;
-    const roleValue = role.value;
-    const loginSuccess = await handleLogin(emailValue, passwordValue, roleValue);
-    
-     try {
-    // 🔹 Send login request to the API
+});
+
+
+
+// Reusable login function
+export const handleLogin = async () => {
+  console.log("Handling login...");
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+  const role = document.getElementById("role").value;
+  const loginMessage = document.getElementById("message");
+  loginMessage.textContent = "";
+
+  if (!email || !password) {
+    loginMessage.textContent = "Email and password are required.";
+    return;
+  }
+
+  try {
     const response = await fetch("/api/v1/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: emailValue, password: passwordValue }),
+      body: JSON.stringify({ email, password }),
     });
 
     const data = await response.json();
-
     if (!response.ok) {
       console.error("Login failed:", data.msg);
-      message.textContent = data.msg || "Invalid email or password";
-      enableInput(true);
-      return false;
+      loginMessage.textContent = data.msg || "Invalid email or password";
+      return;
     }
 
     console.log("Login Successful:", data.user.name);
-
-    // 🔹 Save user info securely
     localStorage.setItem("user", JSON.stringify(data.user));
     localStorage.setItem("token", data.token);
+    localStorage.setItem("role", data.user.role);
     setToken(data.token);
 
-    // 🔹 UI Updates After Login
-    message.textContent = `Welcome ${data.user.name}`;
-    loginDiv.style.display = "none";
-    loginRegisterDiv.style.display = "none";
-    equipmentDiv.style.display = "none";
-
-        // 🔹 Show Add Equipment Button if Admin/Staff
-    if (data.user.role === "admin" || data.user.role === "staff") {
-      console.log("Showing Welcome Buttons for Admin/Staff");
-      setDiv(welcomeDiv);
-      welcomeViewEquipmentButton.style.display = "block";
-      logoutFromWelcomeButton.style.display = "block";
-      welcomeAddEquipmentButton.style.display = "block";
-      showWelcome();
-    } else {
-      setDiv(equipmentDiv);
-      addEquipmentButton.style.display = "none";
-    }
-
-    return true; // Login successful
+    loginMessage.textContent = `Welcome ${data.user.name}`;
+    showWelcome(data.user.role);
   } catch (err) {
     console.error("Login Error:", err);
-    message.textContent = "Error logging in.";
-    return false;
+    loginMessage.textContent = "Error logging in.";
   }
-  })
-}
+};
 
 export const showLogin = () => {
   const logonForm = document.getElementById("logon-form");

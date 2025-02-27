@@ -2,13 +2,14 @@
 const mongoose = require('mongoose')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const { required } = require('joi')
 
 
 const UserSchema = new mongoose.Schema({
     id:{
-        type:mongoose.Types.ObjectId,
-        ref:'User',
-        required:[true, 'Please provide a creator'],
+        type:mongoose.Schema.Types.ObjectId,
+        required:true,
+        default:mongoose.Types.ObjectId(),
     },
     name:{
         type:String,

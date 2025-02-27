@@ -3,19 +3,24 @@ const router = express.Router();
 const { StatusCodes } = require('http-status-codes');
 const User = require('../models/User');
 const { BadRequestError, UnauthenticatedError } = require('../errors');
-const { setToken } = require('../public');
-
-
-
-const user = JSON.parse(localStorage.getItem("user"));
 
 // Register user
 const register = async (req, res) => {
+    try{
   const user = await User.create({ ...req.body });
   const userRole = user.role || "guest";
   const token = user.createJWT();
-  setToken(token); // updated to use the created token
-  res.status(StatusCodes.CREATED).json({ user: { id: user.id, name: user.name }, token, role: userRole });
+
+  res.status(StatusCodes.CREATED).json({ 
+    user: { id: user._id, name: user.name }, 
+    token, 
+    role: userRole });
+} catch (error) {
+    res.status(StatusCodes.BAD_REQUEST).json({ error: error.message });
+}
+if (error.code && error.code === 11000) {
+    return res.status(StatusCodes.CONFLICT).json({ error: "Duplicate value error: A user with this email already exists." });
+}
 };
 
 // Login user
@@ -39,7 +44,7 @@ const login = async (req, res) => {
     }
 
     // ✅ Use the stored user role instead of a hardcoded function
-    const userRole = user.role || "guest"; // Default to 'guest' if role is missing
+    const userRole = user.role
 
     // ✅ Generate JWT Token
     const token = user.createJWT();

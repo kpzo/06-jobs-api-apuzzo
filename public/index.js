@@ -46,9 +46,6 @@ export let role = null;
 
 
 import { handleLoginRegister, showLoginRegister } from "./loginRegister.js";
-import { handleLogin } from "./login.js";
-import { handleRegister } from "./register.js";
-import { showEquipment } from "./equipment.js";
 
 
 document.addEventListener("DOMContentLoaded", (e) => {
@@ -57,20 +54,12 @@ document.addEventListener("DOMContentLoaded", (e) => {
   message = document.getElementById("message");
   role = localStorage.getItem("role");
 
-  if (token) {
-    handleLoginRegister();
-    handleLogin();
-    handleRegister();
-
-    const viewAllEquipmentButton = document.getElementById("view-all-equipment-button");
-    if (token) {
-      viewAllEquipmentButton.style.display = "block";
-      viewAllEquipmentButton.addEventListener("click", (e) => {
-        e.preventDefault();
-        showEquipment();
-      });
-    }
+  if (!document.getElementById("logon-register-div")) {
+    return;
   } else {
+    setDiv(document.getElementById("logon-register-div"));
+
     showLoginRegister();
+    handleLoginRegister();
   }
 });

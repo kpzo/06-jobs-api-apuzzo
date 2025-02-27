@@ -7,314 +7,180 @@ import {
   enableInput,
 } from "./index.js";
 
-import { handleAddEdit } from "./addEdit.js";
 import { showLoginRegister } from "./loginRegister.js";
+import { showWelcome } from "./welcome.js";
 
 const API_URL = "http://localhost:5000/api/v1";
 
-let equipmentDiv = null;
-let equipmentTable = null;
-let equipmentTableHeader = null;
-let response = null;
-let data = null;
+let equipmentDiv, equipmentTable;
 
-export const handleEquipment = async () => {
-  response = await fetch(`${API_URL}/equipment`, {
-    headers: {
-      Authorization: `Bearer ${token()}`,
-    },
-  }); // Fetch equipment data from the server
-  const data = await response.json();
-  equipmentDiv = document.getElementById("equipment");
-  const logoff = document.getElementById("logoff");
-  const addEquipmentDiv = document.getElementById("add-equipment-div");
-  const editEquipmentDiv = document.getElementById("edit-equipment-div");
-  const viewAllEquipmentButton = document.getElementById("view-all-equipment");
-  equipmentTable = document.getElementById("equipment-table");
-  equipmentTableHeader = document.getElementById("equipment-table-header");
-
-  setDiv(equipmentDiv);
-  enableInput(true);
-  
-  addEquipmentDiv.style.display = "none";
-  editEquipmentDiv.style.display = "none";
-  viewAllEquipmentButton.style.display = "block";
-  logoff.style.display = "block";
-
-  viewAllEquipmentButton.addEventListener("click", (e) => {
-    e.preventDefault();
-    fetchAndDisplayEquipment();
-    if (inputEnabled && e.target.nodeName === "BUTTON") {
-      if (e.target === addEquipment) {
-        handleAddEdit(null);
-      } else if (e.target === logoff) {
-        setToken(null);
-        message.textContent = "You have been logged off.";
-        equipmentTable.replaceChildren([equipmentTableHeader]);
-        showLoginRegister();
-      }
-    }
-  });
-};
-
-document.addEventListener('DOMContentLoaded', () => {
-  const logonButton = document.getElementById('logon-button');
-  const registerButton = document.getElementById('register-button');
-  const logonDiv = document.getElementById('logon-div');
-  const registerDiv = document.getElementById('register-div');
-  const logonCancelButton = document.getElementById('logon-cancel');
-  const registerCancelButton = document.getElementById('register-cancel');
-  const equipmentDiv = document.getElementById('equipment-div');
-  const editEquipmentDiv = document.getElementById('edit-equipment-div');  
-  const viewAllEquipmentButton = document.getElementById('view-all-equipment-button');
-  const message = document.getElementById('message');
-  const unauthMessage = document.getElementById('unauth-message');
-  const submitUpdate = document.getElementById('submit-update');
-  const submitAdd = document.getElementById('submit-add');
-  const submitDelete = document.getElementById('submit-delete');
-  const addEquipmentDiv = document.getElementById('add-equipment-div');
-  const equipmentTable = document.getElementById('equipment-table');
-  const editEquipmentButton = document.getElementById('edit-equipment-button');
-  const addEquipmentButton = document.getElementById('add-equipment-button');
-
-  logonButton.addEventListener('click', () => {
-      logonDiv.style.display = 'block';
-      registerDiv.style.display = 'none';
-      editEquipmentDiv.style.display = 'none';
-  });
-
-  registerButton.addEventListener('click', () => {
-      registerDiv.style.display = 'none';
-      logonDiv.style.display = 'none';
-      equipmentDiv.style.display = 'block';
-      editEquipmentDiv.style.display = 'none';
-  });
-
-  logonCancelButton.addEventListener('click', () => {
-      logonDiv.style.display = 'none';
-  });
-
-  registerCancelButton.addEventListener('click', () => {
-      registerDiv.style.display = 'none';
-      showLoginRegister();
-  });
-
-  viewAllEquipmentButton.addEventListener('click', () => {
-      equipmentDiv.style.display = 'block';
-      logonDiv.style.display = 'none';
-      registerDiv.style.display = 'none';
-      editEquipmentDiv.style.display = 'none';
-      fetchAndDisplayEquipment();
-  });
-
-  addEquipmentButton.addEventListener('click', async (e) => {
-    e.preventDefault();
-    const form = document.getElementById('edit-form');
-    const formData = new FormData(form);
-    const data = Object.fromEntries(formData);
-    const response = await fetch(`${API_URL}/equipment`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token()}`,
-      },
-      body: JSON.stringify(data),
-    });
-
-    if (response.ok) {
-      const { equipment } = await response.json();
-      updateEquipmentTable(equipment);
-      form.reset();
-      showEquipment();
-    } else {
-      const { message } = await response.json();
-      document.getElementById('equipment-message').textContent = message;
-    }
-  })
-
-  submitAdd.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const form = document.getElementById('edit-form');
-    const formData = new FormData(form);
-    const data = Object.fromEntries(formData);
-    const response = await fetch(`${API_URL}/equipment`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token()}`,
-      },
-      body: JSON.stringify(data),
-    });
-    if (response.ok) {
-      const { equipment } = await response.json();
-      updateEquipmentTable(equipment);
-      form.reset();
-      showEquipment();
-    } else {
-      const { message } = await response.json();
-      document.getElementById('equipment-message').textContent = message;
-    }
-  });
-
-  editEquipmentButton.addEventListener('click', async (e) => {
-  async function showEditForm(item) {
-    const editForm = document.getElementById('edit-form');
-    editForm.querySelector('#edit-brand').value = item.brand;
-    editForm.querySelector('#edit-mount').value = item.mount;
-    editForm.querySelector('#edit-focal-length').value = item.focalLength;
-    editForm.querySelector('#edit-aperture').value = item.aperture;
-    editForm.querySelector('#edit-version').value = item.version;
-    editForm.querySelector('#edit-serial-number').value = item.serialNumber;
-    editForm.querySelector('#edit-updated-by').value = item.updatedBy;
-    editForm.querySelector('#edit-status').value = item.status;
-    editForm.querySelector('#edit-remarks').value = item.remarks;
-
-    equipmentDiv.style.display = 'none';
-    editEquipmentDiv.style.display = 'block';
+document.addEventListener("DOMContentLoaded", () => {
+  if (token) {
+    showWelcome();
   }
-
-  if (response.ok && data.role && (data.role === "staff" || data.role === "admin")) {
-    enableInput(true);
-  } else {
-    enableInput(false);
-    unauthMessage.style.display = "block";
-    const inputFields = document.querySelectorAll("input, button");
-    inputFields.forEach(field => field.disabled = true);
-    
+  else {
+    showLoginRegister();
   }
-
-    let children = [equipmentTableHeader];
-
-    if (response.ok) {
-      if (data.count === 0) {
-        equipmentTable.replaceChildren(...children);
-      } else {
-        data.equipment.forEach((item) => {
-          let rowEntry = document.createElement("tr");
-          rowEntry.innerHTML = `
-            <td>${item.brand}</td>
-            <td>${item.mount}</td>
-            <td>${item.focalLength}</td>
-            <td>${item.aperture}</td>
-            <td>${item.version}</td>
-            <td>${item.status}</td>
-            <td>${item.serialNumber}</td>
-            <td>${item.createdBy}</td>
-            <td><button type="button" class="editButton" data-id=${item._id}>edit</button></td>
-            <td><button type="button" class="deleteButton" data-id=${item._id}>delete</button></td>
-          `;
-          children.push(rowEntry);
-        });
-        equipmentTable.replaceChildren(...children);
-      }
-    } else {
-      if (message) message.textContent = data.msg || "Error loading equipment.";
-    }
-    showEditForm();
-  });
+  document.getElementById("add-equipment-div").style.display = "none";
 });
 
-export const fetchAndDisplayEquipment = async () => {
-  console.log("🔹 Fetching equipment data...");  
-  const authToken = token; // Store token in variable to avoid multiple calls
-  
-    try {
-      const response = await fetch(`${API_URL}/equipment`, {
-        headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
-      });
-  
-      if (!response.ok) throw new Error("Failed to fetch equipment");
-  
-      const { equipment } = await response.json();
-      updateEquipmentTable(equipment);
+export async function showEquipment() {
+  equipmentDiv = document.getElementById("equipment-div");
+  equipmentTable = document.getElementById("equipment-table");
 
-    } catch (error) {
-      console.error("Error fetching equipment:", error);
-      document.getElementById("message").textContent = "Error loading equipment.";
-    }
+  setupEventListeners();
+  await fetchAndDisplayEquipment();
+}
+
+export function setupEventListeners() {
+  document.getElementById("view-all-equipment-button").addEventListener("click", (e) => {
+    e.preventDefault();
+    fetchAndDisplayEquipment();
+  });
+
+  document.getElementById("logoff-button").addEventListener("click", () => {
+    setToken(null);
+    message.textContent = "You have been logged off.";
+    showLoginRegister();
+  });
+
+  document.getElementById("add-equipment-button").addEventListener("click", showAddEquipmentForm);
+
+  document.getElementById("edit-equipment-button").addEventListener("click", showEditForm);
+}
+
+export async function addEquipment() {
+  const brand = document.getElementById("brand").value;
+  const mount = document.getElementById("mount").value;
+  const focalLength = document.getElementById("focal-length").value;
+  const aperture = document.getElementById("aperture").value;
+  const version = document.getElementById("version").value;
+  const serialNumber = document.getElementById("serial-number").value;
+  const updatedBy = document.getElementById("updated-by").value;
+  const status = document.getElementById("status").value;
+
+  if (!brand || !mount || !focalLength || !aperture || !version || !serialNumber || !updatedBy || !status) {
+    message.textContent = "All fields are required.";
+    return;
   }
 
-  
-export async function showAddEquipmentForm() {
-
-    const addEquipmentForm = document.getElementById('add-equipment-form');
-    addEquipmentForm.reset(); // Clear any existing values in the form
-  
-    const equipmentDiv = document.getElementById('add-equipment-div');
-    const addEquipmentDiv = document.getElementById('add-equipment-div');
-    equipmentDiv.style.display = 'none';
-    addEquipmentDiv.style.display = 'block';
-    addEquipmentForm.style.display = 'block';
-    const id = e.target.getAttribute('data-id');
-
- try {
-    const response = await fetch(`${API_URL}/equipment/${id}`, {
+  try {
+    const response = await fetch(`${API_URL}/equipment`, {
+      method: "POST",
       headers: {
-        Authorization: `Bearer ${token()}`,
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
-    })
+      body: JSON.stringify({
+        brand,
+        mount,
+        focalLength,
+        aperture,
+        version,
+        serialNumber,
+        updatedBy,
+        status,
+      }),
+    });
+
+    if (!response.ok) throw new Error("Failed to add equipment");
+
+    const { equipment } = await response.json();
+    updateEquipmentTable(equipment);
+    message.textContent = "Equipment added.";
+  } catch (error) {
+    console.error("Error adding equipment:", error);
+    message.textContent = "Error adding equipment.";
+  }
+}
+
+export async function fetchAndDisplayEquipment() {
+  try {
+    const response = await fetch(`${API_URL}/equipment`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
     if (!response.ok) throw new Error("Failed to fetch equipment");
 
     const { equipment } = await response.json();
-    handleAddEdit(equipment);
-  }
-  catch (error) {
+    updateEquipmentTable(equipment);
+  } catch (error) {
     console.error("Error fetching equipment:", error);
-    document.getElementById("message").textContent = "Error loading equipment.";
+    message.textContent = "Error loading equipment.";
   }
-} 
+}
 
-  export function updateEquipmentTable(equipment) {
-    const equipmentTable = document.getElementById('equipment-table');
-    const message = document.getElementById('message');
+export function updateEquipmentTable(equipment) {
+  const equipmentTable = document.getElementById("equipment-table");
 
-    if (!equipmentTable || !message) {
-      return console.error("Equipment table or message element not found");
-    }
-    // Clear existing table rows except the header
-    equipmentTable.querySelectorAll('tr:not(:first-child)').forEach(row => row.remove());
+  equipmentTable.innerHTML = "";
   
-    if (!equipment.length) {
-      message.textContent = "No equipment available.";
-      return;
-    }
-  
-    message.textContent = "";
-    equipment.forEach(item => {
-      const row = document.createElement('tr');
-      row.innerHTML = `
-        <td>${item.brand}</td>
-        <td>${item.mount}</td>
-        <td>${item.focalLength}</td>
-        <td>${item.aperture}</td>
-        <td>${item.version}</td>
-        <td>${item.status}</td>
-        <td>${item.updatedBy}</td>
-        <td><button class="editButton" data-id="${item._id}">Edit</button></td>
-        <td><button class="deleteButton" data-id="${item._id}">Delete</button></td>
-      `;
-      equipmentTable.appendChild(row);
-    });
+  if (!equipmentTable) return;
+
+  if (equipment.length === 0) {
+    message.textContent = "No equipment available.";
+    return;
   }
 
-  export const showEquipment = () => {
-    const equipmentDiv = document.getElementById("equipment-div");
-    const editEquipmentButton = document.getElementById("edit-equipment-button");
-    const addNewEquipment = document.getElementById("add-equipment-div");
-    const token = localStorage.getItem("token");
+  equipment.forEach((item) => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${item.brand}</td>
+      <td>${item.mount}</td>
+      <td>${item.focalLength}</td>
+      <td>${item.aperture}</td>
+      <td>${item.version}</td>
+      <td>${item.status}</td>
+      <td>${item.serialNumber}</td>
+      <td>${item.createdBy}</td>
+      <td><button class="editButton" data-id="${item._id}">Edit</button></td>
+      <td><button class="deleteButton" data-id="${item._id}">Delete</button></td>
+    `;
+    
+    row.querySelector(".editButton").addEventListener("click", () => showEditForm(item));
+    row.querySelector(".deleteButton").addEventListener("click", () => deleteEquipment(item._id));
+    equipmentTable.appendChild(row);
+  });
+}
 
-    if (!token) return;
-
-    setDiv(equipmentDiv);
-    enableInput(false);
-  
-    message.textContent = ""; 
-    editEquipmentButton.style.display = "block";
-    addNewEquipment.style.display = "block";
-    equipmentDiv.style.display = "block";
-  
-    editEquipmentButton.addEventListener("click", (e) => {
-      e.preventDefault();
-      showAddEquipmentForm();
+export async function deleteEquipment(id) {
+  try {
+    const response = await fetch(`${API_URL}/equipment/${id}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token()}` },
     });
-  };
+
+    if (!response.ok) throw new Error("Failed to delete equipment");
+    fetchAndDisplayEquipment();
+  } catch (error) {
+    console.error("Error deleting equipment:", error);
+    message.textContent = "Error deleting equipment.";
+  }
+}
+
+export async function showEditForm(item) {
+  const editForm = document.getElementById("edit-form");
+  Object.entries(item).forEach(([key, value]) => {
+    const input = editForm.querySelector(`#edit-${key}`);
+    if (input) input.value = value;
+  });
+  
+  document.getElementById("edit-equipment-div").style.display = "block";
+}
+
+export async function showAddEquipmentForm() {
+  document.getElementById("add-equipment-div").style.display = "block";
+  
+  const equipmentDiv = document.getElementById("equipment-div");
+  equipmentDiv.style.display = "none";
+  
+  const message = document.getElementById("message");
+  message.textContent = "";
+  
+
+  const formFields = ['brand', 'mount', 'focalLength', 'aperture', 'version', 'serialNumber', 'status'];
+  formFields.forEach(field => {
+    const input = document.getElementById(`add-${field}`);
+    if (input) input.value = '';
+  });
+}
