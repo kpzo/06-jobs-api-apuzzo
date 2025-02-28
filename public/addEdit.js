@@ -1,25 +1,27 @@
 
 import { enableInput, inputEnabled, message, setDiv, token } from "./index.js";
-import { showEquipment, fetchAndDisplayEquipment, addEquipment } from "./equipment.js";
+import { fetchAndDisplayEquipment, addEquipment, updateEquipmentTable, fetchEquipmentById } from "./equipment.js";
 import { showWelcome } from "./welcome.js";
 
-let brand = null;
-let status = null;
-let mount = null;
-let focalLength = null;
-let aperture = null;
-let version = null;
-let serialNumber = null;
-let updatedBy = null;
+let brand = document.getElementById("edit-brand");
+let status = document.getElementById("edit-status");
+let mount = document.getElementById("edit-mount");
+let focalLength = document.getElementById("edit-focal-length");
+let aperture = document.getElementById("edit-aperture");
+let version = document.getElementById("edit-version");
+let serialNumber = document.getElementById("edit-serial-number");
+let updatedBy = document.getElementById("edit-updated-by");
 
+const API_URL = "http://localhost:5000";
 
 document.addEventListener("DOMContentLoaded", () => {
 const welcomeAddEquipmentButton = document.getElementById("add-equipment-after-login-button");
 const addEquipmentDiv = document.getElementById("add-equipment-div");
 const welcomeDiv = document.getElementById("welcome-div");
 const goBackButton = document.getElementById("go-back-button");
-const user = JSON.parse(localStorage.getItem("user"));
-const editCancel = document.getElementById("edit-cancel-button");
+const submitAddButton = document.getElementById("submit-add-button");
+const equipmentDiv = document.getElementById("equipment-div");
+const userRole = JSON.parse(localStorage.getItem("user")).role;
 
   window.addEventListener("beforeunload", () => {
     const user = JSON.parse(localStorage.getItem("user"));
@@ -29,60 +31,20 @@ const editCancel = document.getElementById("edit-cancel-button");
   });
 
   welcomeAddEquipmentButton.addEventListener("click", async (e) => {
-    if (inputEnabled && e.target.nodeName === "BUTTON") {
-      if (e.target === addEquipmentDiv) {
-        enableInput(true);
-
-        let method = "POST";
-        let url = "/api/v1/equipment";
-        try {
-          const response = await fetch(url, {
-            method: method,
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token()}`,
-            },
-            body: JSON.stringify({
-              brand: brand.value,
-              mount: mount.value,
-              focalLength: focalLength.value,
-              aperture: aperture.value,
-              version: version.value,
-              serialNumber: serialNumber.value,
-              updatedBy: updatedBy.value,
-              status: status.value,
-            }),
-          });
-
-          const data = await response.json();
-          if (response.status === 201) {
-            message.textContent = "The equipment entry was created.";
-            brand.value = "";
-            mount.value = "";
-            focalLength.value = "";
-            aperture.value = "";
-            version.value = "";
-            serialNumber.value = "";
-            updatedBy.value = "";
-            status.value = "available";
-
-            showEquipment();
-          } else {
-            message.textContent = data.msg;
-          }
-        } catch (err) {
-          console.error(err);
-          message.textContent = "A communication error occurred.";
-        }
-        enableInput(true);
-      } else if (e.target === editCancel) {
-        message.textContent = "";
-        showEquipment();
-      }
-      addEquipment()
-    }
+    e.preventDefault();
+    showAddEquipmentForm();
   });
 
+  submitAddButton.addEventListener("click", async (e) => {
+    e.preventDefault();
+    enableInput(true);
+    const fields = brand && mount && focalLength && aperture && version && serialNumber && updatedBy && status;
+    if (fields) {
+      await addEquipment();
+    } else {
+      message.textContent = "Please fill in all required fields.";
+    }
+  });
 
   goBackButton.addEventListener("click", (e) => {
     e.preventDefault();
@@ -95,28 +57,58 @@ const editCancel = document.getElementById("edit-cancel-button");
       enableInput(false);
     }
   });
-})
 
-  document.addEventListener("click", async (e) => {
-    if (e.target && e.target.id === "edit-button") {
-      if (state.userRole === "admin" || state.userRole === "staff") {
-        showEditForm();
+  equipmentDiv.addEventListener("click", async (e) => {
+    // Ensure the event target is a button
+    if (!e.target || !e.target.matches("button")) return;
+  
+    e.preventDefault(); // Prevent default button behavior
+  
+    // Extract equipment ID
+    const itemId = e.target.dataset.id;
+
+    if (!itemId) {
+      console.error("❌ Error: Missing equipment ID in dataset.");
+      return;
+    }
+  
+    console.log("📌 Clicked button ID:", e.target.id, " | Equipment ID:", itemId);
+  
+    // ✅ EDIT BUTTON LOGIC
+    if (e.target.id === "edit-button") {
+      if (userRole === "admin" || userRole === "staff") {
+        try {
+          console.log("📌 Fetching equipment with ID:", itemId);
+          const equipmentItem = await fetchEquipmentById(itemId);
+          
+          if (!equipmentItem) {
+            return;
+          }
+  
+          showEditForm(equipmentItem);
+        } catch (error) {
+          console.error("❌ Error fetching equipment:", error);
+        }
       } else {
         alert("You must be an admin or staff to edit equipment.");
       }
     }
   
-    if (e.target && e.target.id === "delete-button") {
-      if (state.userRole === "admin" || state.userRole === "staff") {
+    // ✅ DELETE BUTTON LOGIC
+    if (e.target.id === "delete-button") {
+      if (userRole === "admin" || userRole === "staff") {
         const confirmed = confirm("Are you sure you want to delete this equipment?");
         if (confirmed) {
           try {
-            const response = await fetch(`${API_URL}/equipment/${item._id}`, {
+            console.log("📌 Deleting equipment with ID:", itemId);
+            const response = await fetch(`${API_URL}/equipment/${itemId}`, {
               method: "DELETE",
               headers: { Authorization: `Bearer ${token()}` },
             });
   
             if (!response.ok) throw new Error("Failed to delete equipment");
+  
+            console.log("✅ Equipment deleted successfully.");
             fetchAndDisplayEquipment();
           } catch (error) {
             console.error("❌ Error deleting equipment:", error);
@@ -128,6 +120,8 @@ const editCancel = document.getElementById("edit-cancel-button");
       }
     }
   });
+  
+})
 
 
 export const showAddEquipmentForm = () => {
@@ -145,83 +139,64 @@ export const showAddEquipmentForm = () => {
   message.textContent = "";
 };
 
+export async function showEditForm(equipment) {
+  console.log("Showing edit equipment form...");
 
-export const showEditForm = (equipment) => {
   const editEquipmentDiv = document.getElementById("edit-equipment-div");
-  document.getElementById("edit-brand").value = equipment.brand;
-  document.getElementById("edit-mount").value = equipment.mount;
-  document.getElementById("edit-focal-length").value = equipment.focalLength;
-  document.getElementById("edit-aperture").value = equipment.aperture;
-  document.getElementById("edit-version").value = equipment.version;
-  document.getElementById("edit-serial-number").value = equipment.serialNumber;
-  document.getElementById("edit-updated-by").value = equipment.updatedBy;
-  document.getElementById("edit-status").value = equipment.status;
-  const editForm = document.getElementById("edit-form");
-  message.textContent = "";
-  addEditDiv.addEventListener("click", async (e) => {
-    if (!inputEnabled || e.target.nodeName !== "BUTTON") return;
+  const brandText = document.getElementById("edit-brand-text");
+  const mountText = document.getElementById("edit-mount-text");
+  const focalLengthText = document.getElementById("edit-focal-length-text");
+  const apertureText = document.getElementById("edit-aperture-text");
+  const versionText = document.getElementById("edit-version-text");
+  const serialNumberText = document.getElementById("edit-serial-number-text");
+  const updatedByInput = document.getElementById("edit-updated-by");
+  const statusInput = document.getElementById("edit-status");
+  const remarksInput = document.getElementById("edit-remarks");
+  const equipmentDiv = document.getElementById("equipment-div");
 
-    if (e.target === addingEquipment) {
-      if (userRole !== 'admin' && userRole !== 'staff') {
-        alert("You must be an admin or staff to add equipment.");
-        return;
-      }
+  editEquipmentDiv.style.display = "block";
+  equipmentDiv.style.display = "none";
+
+  // Populate fields with equipment data
+  brandText.textContent = equipment.brand;
+  mountText.textContent = equipment.mount;
+  focalLengthText.textContent = equipment.focalLength;
+  apertureText.textContent = equipment.aperture;
+  versionText.textContent = equipment.version;
+  serialNumberText.textContent = equipment.serialNumber; 
+  updatedByInput.value = equipment.updatedBy;
+  statusInput.value = equipment.status;
+  remarksInput.value = equipment.remarks;
 
       setDiv(editEquipmentDiv);
-      enableInput(true);
+}
 
-      enableInput(false);
+export const updateEquipment = async () => {
+  enableInput(true);
+  const equipmentId = document.getElementById("edit-equipment-id").value;
+  const updatedBy = document.getElementById("edit-updated-by").value;
+  const status = document.getElementById("edit-status").value;
+  const remarks = document.getElementById("edit-remarks").value;
 
-      let method = "POST";
-      let url = "/api/v1/equipment";
+  console.log("Updating equipment...");
 
-      try {
-        const response = await fetch(url, {
-          method: method,
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            brand: brand.value,
-            mount: mount.value,
-            focalLength: focalLength.value,
-            aperture: aperture.value,
-            version: version.value,
-            serialNumber: serialNumber.value,
-            updatedBy: updatedBy.value,
-            status: status.value,
-          }),
-        });
+  try {
+    const response = await fetch(`${API_URL}/equipment/${equipmentId}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ updatedBy, status, remarks }),
+    });
 
-        const data = await response.json();
-        if (response.ok) {
-          if (message) message.textContent = "The equipment entry was created.";
+    if (!response.ok) throw new Error("Failed to update equipment");
 
-          // Reset fields
-          brand.value = "";
-          mount.value = "";
-          focalLength.value = "";
-          aperture.value = "";
-          version.value = "";
-          serialNumber.value = "";
-          updatedBy.value = "";
-          status.value = "available";
-
-          showEquipment();
-        } else {
-          if (message) message.textContent = data.msg;
-        }
-      } catch (err) {
-        console.error(err);
-        if (message) message.textContent = "A communication error occurred.";
-      }
-
-      enableInput(true);
-    } else if (e.target === editCancel) {
-      if (message) message.textContent = "";
-      showEquipment();
-    }
-  });
-};
+    console.log("✅ Equipment updated successfully.");
+    updateEquipmentTable();
+  } catch (error) {
+    console.error("❌ Error updating equipment:", error);
+    document.getElementById("equipment-message").textContent = "Error updating equipment.";
+  }
+}
 

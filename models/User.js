@@ -6,7 +6,7 @@ const { required } = require('joi')
 
 
 const UserSchema = new mongoose.Schema({
-    id:{
+    userId:{
         type:mongoose.Schema.Types.ObjectId,
         required:true,
         default:mongoose.Types.ObjectId(),
@@ -46,7 +46,9 @@ UserSchema.pre('save', async function(){
 
 // once again use 'function' to refer to our document for specific user data
 UserSchema.methods.createJWT = function() {
-    return jwt.sign({ userId: this._id, name: this.name }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_LIFETIME })
+    return jwt.sign({ userId: this._id, name: this.name, role: this.role  }, 
+        process.env.JWT_SECRET, 
+        { expiresIn: process.env.JWT_LIFETIME })
 }
 
 UserSchema.methods.comparePassword = async function(providedPassword) {
@@ -55,5 +57,16 @@ UserSchema.methods.comparePassword = async function(providedPassword) {
 }
 
 // to keep logic in all place (UserSchema) - generate token using instance method instead of having it in the controller
+
+UserSchema.methods.updateRole = async function(newRole) {
+    this.role = newRole;
+    await this.save();
+};
+
+
+UserSchema.statics.findByRole = async function(role) {
+    return await this.find({ role });
+};
+
 
 module.exports = mongoose.model('User', UserSchema)

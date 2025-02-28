@@ -97,56 +97,54 @@
         <th>Updated By</th>
         <th colspan="2"></th>
       </tr>
-      <button type="button" id="logoff-from-equipment-button">Log Out</button>
     </table>
+    <button type="button" id="logoff-from-equipment-button">Log Out</button>
+    <button type="button" id="add-equipment-button">Add Equipment</button>
+    <button type="button" id="view-all-equipment-button">View All Equipment</button>
   </div>
 
-  <!-- Equipment Edit Form -->
-  <div id="edit-equipment-div" style="display: none;">
-    <h2>Edit Equipment</h2>
-    <form id="edit-form">
-      <label for="edit-brand">Brand:</label>
-      <input type="text" id="edit-brand" />
+<!-- Equipment Edit Form -->
+<div id="edit-equipment-div" style="display: none;">
+  <h2>Edit Equipment</h2>
+  <form id="edit-form">
+    <label for="edit-brand">Brand:</label>
+    <span id="edit-brand-text"></span>
 
-      <label for="edit-mount">Mount:</label>
-      <input type="text" id="edit-mount" />
+    <label for="edit-mount">Mount:</label>
+    <span id="edit-mount-text"></span>
 
-      <label for="edit-focal-length">Focal Length:</label>
-      <input type="text" id="edit-focal-length" />
+    <label for="edit-focal-length">Focal Length:</label>
+    <span id="edit-focal-length-text"></span>
 
-      <label for="edit-aperture">Aperture:</label>
-      <input type="text" id="edit-aperture" />
+    <label for="edit-aperture">Aperture:</label>
+    <span id="edit-aperture-text"></span>
 
-      <label for="edit-version">Version:</label>
-      <input type="text" id="edit-version" />
+    <label for="edit-version">Version:</label>
+    <span id="edit-version-text"></span>
 
-      <label for="edit-serial-number">Serial Number:</label>
-      <input type="text" id="edit-serial-number" />
+    <label for="edit-serial-number">Serial Number:</label>
+    <span id="edit-serial-number-text"></span>
 
-      <label for="edit-updated-by">Updated By:</label>
-      <input type="text" id="edit-updated-by" required />
+    <label for="edit-updated-by">Updated By:</label>
+    <input type="text" id="edit-updated-by" required />
 
-      <label for="status">Status:</label>
-      <select id="status" required>
-        <option value="available">Available</option>
-        <option value="retired">Retired</option>
-        <option value="in-use">In Use</option>
-        <option value="reserved">Reserved</option>
-        <option value="pending">Pending</option>
-      </select>
+    <label for="edit-status">Status:</label>
+    <select id="edit-status" required>
+      <option value="available">Available</option>
+      <option value="retired">Retired</option>
+      <option value="in-use">In Use</option>
+      <option value="reserved">Reserved</option>
+      <option value="pending">Pending</option>
+    </select>
 
-      <label for="edit-remarks">Remarks:</label>
-      <textarea id="edit-remarks"></textarea>
+    <label for="edit-remarks">Remarks:</label>
+    <textarea id="edit-remarks"></textarea>
 
-      <button type="button" id="edit-equipment-button">Edit Equipment</button>
-      <button type="button" id="view-all-equipment-button">View All Equipment</button>
-      <button type="submit" id="submit-update-button">Update</button>
-      <button type="button" id="delete-equipment-button">Delete</button>
-      <button type="button" id="edit-cancel-button">Cancel</button>
-
-    </form>
-    <div id="successMessage">Equipment updated successfully.</div>
-    <div id="unauthMessage">You must be staff or admin to access</div>
+    <button type="button" id="view-all-equipment-button">View All Equipment</button>
+    <button type="submit" id="submit-update-button">Update</button>
+    <button type="button" id="delete-equipment-button">Delete</button>
+    <button type="button" id="edit-cancel-button">Cancel</button>
+  </form>
 </div>
 
 <!-- Add Equipment Form -->
@@ -185,8 +183,8 @@
 
     <label for="add-remarks">Remarks:</label>
     <textarea id="add-remarks"></textarea>
-    
-    <button type="submit" id="submit-add">Add</button>
+
+    <button type="submit" id="submit-add-button">Add</button>
     <button type="button" id="back-to-all-equipment">Back To All Equipment</button>
     <button type="button" id="add-cancel">Cancel</button>
     <button type="button" id="go-back-button">Go Back</button>

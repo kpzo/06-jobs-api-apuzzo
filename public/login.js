@@ -5,10 +5,93 @@ import {
   message,
   enableInput,
   setToken,
+  token,
 } from "./index.js";
 import { showLoginRegister } from "./loginRegister.js";
 import { showRegister } from "./register.js";
 import { showWelcome } from "./welcome.js";
+
+export const handleLogin = async () => {
+  console.log("Handling login...");
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+  const role = document.getElementById("role").value;
+  const loginMessage = document.getElementById("message");
+  loginMessage.textContent = "";
+
+  if (!email || !password) {
+    loginMessage.textContent = "Email and password are required.";
+    return;
+  }
+  if( email && password && role) {
+  try {
+    const response = await fetch("/api/v1/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      console.error("Login failed:", data.msg);
+      loginMessage.textContent = data.msg || "Invalid email or password";
+      return;
+    }
+
+    console.log("Login Successful:", data.user.name);
+    localStorage.setItem("user", JSON.stringify(data.user));
+    localStorage.setItem("token", data.token);
+    localStorage.setItem("role", data.user.role);
+    setToken(data.token);
+
+    loginMessage.textContent = `Welcome ${data.user.name}`;
+    showWelcome(data.user.role);
+  } catch (err) {
+    console.error("Login Error:", err);
+    loginMessage.textContent = "Error logging in.";
+  }
+} else {
+  loginMessage.textContent = "All fields are required.";
+  return;
+};}
+
+export const showLogin = () => {
+  const logonForm = document.getElementById("logon-form");
+  const logonButton = document.getElementById("logon-button");
+  const message = document.getElementById("message");
+  const logonCancel = document.getElementById("logon-cancel");
+  const equipmentDiv = document.getElementById("equipment-div");
+  const loginSubmit = document.getElementById("logon-submit");
+  const addEquipmentDiv = document.getElementById("add-equipment-div");
+  const email = document.getElementById("email");
+  const password = document.getElementById("password");
+  const loginDiv = document.getElementById("logon-div");
+  const registerButton = document.getElementById("register-button");
+
+  email.value = "";
+  password.value = "";
+
+  if (!loginDiv) {
+    loginDiv = document.getElementById("logon-div");
+  }
+  setDiv(loginDiv);
+  enableInput(true);
+
+  message.textContent = "";
+
+  loginDiv.style.display = "block";
+  logonForm.style.display = "block";
+  logonButton.style.display = "none";
+  registerButton.style.display = "none";
+  loginSubmit.style.display = "block";
+  logonCancel.style.display = "block";
+  equipmentDiv.style.display = "none";
+  logonCancel.style.display = "block";
+
+  if (loginDiv.style.display === "block") {
+    addEquipmentDiv.style.display = "none";
+  }
+}
 
 document.addEventListener("DOMContentLoaded", async () => {
   const loginRegisterDiv = document.getElementById("logon-register-div");
@@ -79,93 +162,15 @@ logonCancel.addEventListener("click", (e) => {
   logonSubmit.addEventListener("click", async (e) => {
     const welcomeDiv = document.getElementById("welcome-div");
     e.preventDefault();
-    if (inputEnabled) {
+    enableInput(true);
+    if (email.value && password.value) {
       await handleLogin();
       setDiv(welcomeDiv);
       showWelcome();
+    } else {
+      message.textContent = "Please enter both email and password.";
+      showLogin();
     }
   });
   
 });
-
-
-
-// Reusable login function
-export const handleLogin = async () => {
-  console.log("Handling login...");
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
-  const role = document.getElementById("role").value;
-  const loginMessage = document.getElementById("message");
-  loginMessage.textContent = "";
-
-  if (!email || !password) {
-    loginMessage.textContent = "Email and password are required.";
-    return;
-  }
-
-  try {
-    const response = await fetch("/api/v1/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
-
-    const data = await response.json();
-    if (!response.ok) {
-      console.error("Login failed:", data.msg);
-      loginMessage.textContent = data.msg || "Invalid email or password";
-      return;
-    }
-
-    console.log("Login Successful:", data.user.name);
-    localStorage.setItem("user", JSON.stringify(data.user));
-    localStorage.setItem("token", data.token);
-    localStorage.setItem("role", data.user.role);
-    setToken(data.token);
-
-    loginMessage.textContent = `Welcome ${data.user.name}`;
-    showWelcome(data.user.role);
-  } catch (err) {
-    console.error("Login Error:", err);
-    loginMessage.textContent = "Error logging in.";
-  }
-};
-
-export const showLogin = () => {
-  const logonForm = document.getElementById("logon-form");
-  const logonButton = document.getElementById("logon-button");
-  const message = document.getElementById("message");
-  const logonCancel = document.getElementById("logon-cancel");
-  const equipmentDiv = document.getElementById("equipment-div");
-  const loginSubmit = document.getElementById("logon-submit");
-  const addEquipmentDiv = document.getElementById("add-equipment-div");
-  const email = document.getElementById("email");
-  const password = document.getElementById("password");
-  const loginDiv = document.getElementById("logon-div");
-  const registerButton = document.getElementById("register-button");
-
-  email.value = "";
-  password.value = "";
-
-  if (!loginDiv) {
-    loginDiv = document.getElementById("logon-div");
-  }
-  setDiv(loginDiv);
-  enableInput(true);
-
-  message.textContent = "";
-
-  loginDiv.style.display = "block";
-  logonForm.style.display = "block";
-  logonButton.style.display = "none";
-  registerButton.style.display = "none";
-  loginSubmit.style.display = "block";
-  logonCancel.style.display = "block";
-  equipmentDiv.style.display = "none";
-  logonCancel.style.display = "block";
-
-  if (loginDiv.style.display === "block") {
-    addEquipmentDiv.style.display = "none";
-  }
-}

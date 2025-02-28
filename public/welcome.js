@@ -1,5 +1,5 @@
 
-import { setDiv, handleLogoff } from "./index.js";
+import { setDiv, handleLogoff, token } from "./index.js";
 import { fetchAndDisplayEquipment } from "./equipment.js";
 import { showAddEquipmentForm } from "./addEdit.js";
 import { setupEventListeners } from "./equipment.js";
@@ -52,9 +52,12 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
 
             goBackButton.style.display = 'block';
-
-            setDiv(equipmentDiv);
-            fetchAndDisplayEquipment();
+            if (token) {
+                setDiv(equipmentDiv);
+                fetchAndDisplayEquipment();
+            } else {
+                showLoginRegister();
+            }
         });
     }
 
@@ -64,9 +67,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
             goBackButton.style.display = 'block';
             addEquipmentDiv.style.display = 'block';
-        
-            setDiv(addEquipmentDiv);
-            showAddEquipmentForm();
+            if (token) {
+                setDiv(addEquipmentDiv);
+                showAddEquipmentForm();
+            } else {
+                showLoginRegister();
+            }
+            
         });
     }
 

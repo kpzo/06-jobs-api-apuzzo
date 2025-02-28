@@ -19,3 +19,61 @@
     }
     // save user info to db
     const user = await User.create({...tempUser })
+
+
+    
+    if (inputEnabled && e.target.nodeName === "BUTTON") {
+      if (e.target === addEquipmentButton) {
+        enableInput(true);
+
+        let method = "POST";
+        let url = "/api/v1/equipment";
+        try {
+          const response = await fetch(url, {
+            method: method,
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              brand: brand.value,
+              mount: mount.value,
+              focalLength: focalLength.value,
+              aperture: aperture.value,
+              version: version.value,
+              serialNumber: serialNumber.value,
+              updatedBy: updatedBy.value,
+              status: status.value,
+            }),
+          });
+
+          const data = await response.json();
+          if (response.status === 201) {
+            message.textContent = "The equipment entry was created.";
+            brand.value = "";
+            mount.value = "";
+            focalLength.value = "";
+            aperture.value = "";
+            version.value = "";
+            serialNumber.value = "";
+            updatedBy.value = "";
+            status.value = "available";
+
+            showEquipment();
+          } else {
+            message.textContent = data.msg;
+          }
+        } catch (err) {
+          console.error(err);
+          message.textContent = "A communication error occurred.";
+        }
+        enableInput(true);
+      } else if (e.target === editCancel) {
+        message.textContent = "";
+        showEquipment();
+      } else if (e.target === submitAddButton) {
+        e.preventDefault();
+        await addEquipment();
+      }
+    }
+  })

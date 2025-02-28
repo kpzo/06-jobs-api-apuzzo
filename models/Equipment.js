@@ -2,11 +2,6 @@
 const mongoose = require('mongoose')
 
 const EquipmentSchema = new mongoose.Schema({
-    id: {
-        type: mongoose.Schema.Types.ObjectId,
-        required: true,
-        default: mongoose.Types.ObjectId()
-    },
     brand: {
         type: String,
         required: [true, 'Please provide brand'],

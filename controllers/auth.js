@@ -8,11 +8,10 @@ const { BadRequestError, UnauthenticatedError } = require('../errors');
 const register = async (req, res) => {
     try{
   const user = await User.create({ ...req.body });
-  const userRole = user.role || "guest";
   const token = user.createJWT();
 
   res.status(StatusCodes.CREATED).json({ 
-    user: { id: user._id, name: user.name }, 
+    user: { id: user._id, name: user.name, role: userRole }, 
     token, 
     role: userRole });
 } catch (error) {
@@ -61,7 +60,7 @@ const login = async (req, res) => {
 
     // ✅ Return success response
     res.status(StatusCodes.OK).json({ 
-        user: { name: user.name, role: userRole }, 
+        user: { id: user._id, name: user.name, role: user.role }, 
         token 
     });
 };

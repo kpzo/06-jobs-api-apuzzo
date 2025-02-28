@@ -9,17 +9,19 @@ const {
     updateEquipment,
     deleteEquipment,
 } = require('../controllers/equipment');
-const authUser = require('../middleware/authentication');
-const authRoles = require('../middleware/authorizeRoles');
+
+const auth = require('../middleware/authentication');
+const checkRole = require('../middleware/authorizeRoles');
 
 
 router.route('/')
     .get(getAllEquipment)
-    .post(authUser, authRoles('admin', 'staff'), createEquipment);
+    .post(auth, checkRole, createEquipment);
 
 router.route('/:id')
     .get(getEquipment)
-    .patch(authUser, authRoles('admin', 'staff'), updateEquipment)
-    .delete(authUser, authRoles('admin', 'staff'), deleteEquipment);
+    .patch(auth, checkRole, updateEquipment)
+    .delete(auth, checkRole, deleteEquipment)
+    .put(auth, checkRole, updateEquipment);
 
 module.exports = router;

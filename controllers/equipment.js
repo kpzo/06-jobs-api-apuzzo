@@ -1,12 +1,16 @@
 const Equipment = require('../models/Equipment');
 const { StatusCodes } = require('http-status-codes');
 const { BadRequestError, NotFoundError } = require('../errors');
-const authorizeRoles = require('../middleware/authorizeRoles');
+const checkRoles = require('../middleware/authorizeRoles');
 const auth = require('../middleware/authentication');
 
 const getAllEquipment = async (req, res) => {
     try {
         const equipment = await Equipment.find({}).populate('createdBy', 'name');
+        const responseData = Array.isArray(equipment) ? equipment : [equipment];
+        if (responseData.length < 1) {
+            throw new NotFoundError('No equipment found');
+        }
         res.status(StatusCodes.OK).json({ equipment, count: equipment.length });
     } catch (error) {
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Error fetching equipment' });
@@ -24,13 +28,21 @@ const getEquipment = async (req, res) => {
 };
 
 const createEquipment = async (req, res) => {
+
+    try {
+    console.log('checking req.user in createEquipment', req.user);
+
     req.body.createdBy = req.user.userId;
+
     if (!req.user) {
         throw new BadRequestError('Please login to add equipment');
     }
-    const equipment = await Equipment.create(req.body);
-    res.status(StatusCodes.CREATED).json({ equipment });
+    const newEquipment = await Equipment.create(req.body);
+    res.status(StatusCodes.CREATED).json({ equipment : [newEquipment] });
+} catch (error) {
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'Error creating Equipment' });
 };
+}
 
 const updateEquipment = async (req, res) => {
     const {
@@ -42,7 +54,6 @@ const updateEquipment = async (req, res) => {
     if (status === 'pending') {
         throw new BadRequestError('Please locate equipment and update status');
     }
-    
 
     req.body.updatedBy = userId;
 
@@ -57,6 +68,7 @@ const updateEquipment = async (req, res) => {
 
     res.status(StatusCodes.OK).json({ equipment });
 };
+
 
 const deleteEquipment = async (req, res) => {
     const { params: { id: equipmentId } } = req;
@@ -73,7 +85,7 @@ const deleteEquipment = async (req, res) => {
 module.exports = {
     getAllEquipment,
     getEquipment,
-    createEquipment: [authorizeRoles('admin', 'staff'), createEquipment],
-    updateEquipment: [authorizeRoles('admin', 'staff'), updateEquipment],
-    deleteEquipment: [authorizeRoles('admin', 'staff'), deleteEquipment],
+    createEquipment,
+    updateEquipment,
+    deleteEquipment,
 };
