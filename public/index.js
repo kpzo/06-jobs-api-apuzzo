@@ -1,3 +1,6 @@
+import { showLoginRegister } from "./loginRegister.js";
+import { showWelcome } from "./welcome.js";
+
 let activeDiv = null;
 export const setDiv = (newDiv) => {
   if (newDiv != activeDiv) {
@@ -35,20 +38,30 @@ export const formatDate = (dateString) => {
 
 export const handleLogoff = () => {
   setToken(null);
-    if (message) message.textContent = "You have been logged off.";
-    showLoginRegister();
+  if (message) message.textContent = "You have been logged off.";
+  showLoginRegister();
 };
-
 
 export let message = null;
 export let role = null;
 
-
-import { handleLoginRegister, showLoginRegister } from "./loginRegister.js";
-
-
 document.addEventListener("DOMContentLoaded", (e) => {
   e.preventDefault();
+
+  const storedToken = localStorage.getItem("token");
+  const storedUser = JSON.parse(localStorage.getItem("user"));
+
+  message = document.getElementById("message");
+
+  if (storedToken && storedUser) {
+    console.log('user found, auto login');
+    setToken(storedToken);
+    showWelcome();
+  } else {
+    console.log('no user found, show login/register');
+    setDiv(document.getElementById("logon-register-div"));
+    showLoginRegister();
+  }
 
   window.addEventListener("beforeunload", () => {
     const user = JSON.parse(localStorage.getItem("user"));
@@ -56,17 +69,23 @@ document.addEventListener("DOMContentLoaded", (e) => {
       localStorage.setItem("user", JSON.stringify(user));  // ✅ Resave user info
     }
   });
-  
-  token = localStorage.getItem("token");
-  message = document.getElementById("message");
-  role = localStorage.getItem("role");
+});
 
-  if (!document.getElementById("logon-register-div")) {
-    return;
-  } else {
-    setDiv(document.getElementById("logon-register-div"));
+document.addEventListener("DOMContentLoaded", () => {
+  console.log("✅ DOM fully loaded, checking for elements...");
 
-    showLoginRegister();
-    handleLoginRegister();
-  }
+  [
+    "edit-brand-text", 
+    "edit-mount-text", 
+    "edit-focal-length-text",
+    "edit-aperture-text",
+    "edit-version-text",
+    "edit-serial-number-text",
+    "edit-updated-by",
+    "edit-status",
+    "edit-remarks"
+  ].forEach(id => {
+    const element = document.getElementById(id);
+    console.log(`❓ ${id} exists?`, element ? "✅ YES" : "❌ NO");
+  });
 });

@@ -42,6 +42,10 @@ const EquipmentSchema = new mongoose.Schema({
         type: mongoose.Types.ObjectId,
         ref: 'User',
         required: [true, 'Please provide creator']
+    },
+    remarks: {
+        type: String,
+        maxlength: 100
     }
 }, 
 { timestamps: true}

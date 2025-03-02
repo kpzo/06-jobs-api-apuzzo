@@ -133,15 +133,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Add event listener for goBackButton to return to the previous view
   goBackButton.addEventListener("click", (e) => {
     e.preventDefault();
-    const addEquipmentDiv = document.getElementById("add-equipment-div");
-    const welcomeDiv = document.getElementById("welcome-div");
-
-    if (addEquipmentDiv.style.display === "block") {
-        setDiv(welcomeDiv);
-        showWelcome();
-    } else {
-        showLogin();
-    }
+    window.history.back();
 });
 
 registerButton.addEventListener("click", (e) => {

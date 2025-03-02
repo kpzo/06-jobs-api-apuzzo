@@ -11,11 +11,11 @@ import {
 
 import { showLoginRegister } from "./loginRegister.js";
 import { showWelcome } from "./welcome.js";
-import { showAddEquipmentForm, showEditForm, updateEquipment } from "./addEdit.js";
+import { showAddEquipmentForm, showEditForm } from "./addEdit.js";
 
 const API_URL = "http://localhost:5000/api/v1";
 
-let equipmentDiv, equipmentTable;
+let equipmentDiv;
 
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -26,13 +26,28 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  document.getElementById("equipment-table").addEventListener("click", async (e) => {
+    if (e.target.id === "edit-button") {
+      console.log("🛠️ Edit button clicked, fetching equipment...");
+      
+      const equipmentId = e.target.dataset.id;
+      const equipmentData = await fetchEquipmentById(equipmentId);
+      
+      if (equipmentData) {
+        console.log("✅ Equipment Data Retrieved:", equipmentData);
+        showEditForm(equipmentData);
+      } else {
+        console.error("❌ Error: Could not load equipment data.");
+      }
+    }
+  });
+  
+
   enableInput(true);
   if (token) {
     showWelcome();
     showAddEquipmentForm();
     showEquipment();
-    showEditEquipmentFormById();
-    showEditForm();
   }
   else {
     showLoginRegister();
@@ -68,11 +83,6 @@ export function setupEventListeners() {
     showLoginRegister();
     handleLogoff();
   });
- 
-  document.getElementById('submit-add-button').addEventListener('click', (e) => {
-    e.preventDefault();
-    addEquipment();
-  });
   
   document.getElementById('add-equipment-button').addEventListener('click', showAddEquipmentForm);
   
@@ -81,15 +91,12 @@ export function setupEventListeners() {
     showLoginRegister();
     addEquipmentDiv.style.display = "none";
   });
-  
-  document.getElementById("submit-update-button").addEventListener("click", async (e) => {
-    e.preventDefault();
-    await updateEquipment();
-    setDiv(equipmentDiv);
-  });
 }
 
-export async function addEquipment() {
+
+
+
+export async function addEquipment(equipmentId) {
   const brand = document.getElementById("add-brand").value;
   const mount = document.getElementById("add-mount").value;
   const focalLength = document.getElementById("add-focal-length").value;
@@ -111,10 +118,9 @@ export async function addEquipment() {
     message.textContent = "All fields are required.";
     return;
   } 
-
   try {
-    const response = await fetch(`${API_URL}/equipment`, {
-      method: "POST",
+    const response = await fetch(`${API_URL}/equipment/${equipmentId}`, {
+      method: "PUT",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${authToken}`,
@@ -154,6 +160,9 @@ export async function addEquipment() {
   }
 }
 
+
+
+
 export async function fetchAndDisplayEquipment() {
   try {
     const response = await fetch(`${API_URL}/equipment`, {
@@ -162,7 +171,10 @@ export async function fetchAndDisplayEquipment() {
 
     if (!response.ok) throw new Error("Failed to fetch equipment");
 
-    const { equipment } = await response.json();
+    let { equipment } = await response.json();
+    if (!Array.isArray(equipment)) {
+      equipment = [equipment];
+    }
     console.log('equipment data:', equipment)
 
     updateEquipmentTable(Array.isArray(equipment) ? equipment : [equipment]);
@@ -177,24 +189,21 @@ export async function fetchAndDisplayEquipment() {
 
 export function updateEquipmentTable(equipment) {
   const equipmentTable = document.getElementById("equipment-table");
-  console.log('equipment data received:', equipment)
+  const message = document.getElementById("message");
+  console.log('equipment data received:', equipment);
 
-  if (!equipment) {
-    console.error("updateEquipmentTable: Invalid equipment data received:", equipment);
-    return;
-  }
-  
-  if (!Array.isArray(equipment)) {
-    console.error("updateEquipmentTable: Invalid equipment data received:", equipment);
-    return;
-  }
+  // if (!equipment || !Array.isArray(equipment)) {
+  //   console.error("updateEquipmentTable: Invalid equipment data received:", equipment);
+  //   message.textContent = "Invalid equipment data.";
+  //   return;
+  // }
 
   if (!equipmentTable) {
     console.error("updateEquipmentTable: No equipment table found");
     return;
   }
 
-  if (!equipment || equipment.length === 0) {
+  if (equipment.length === 0) {
     message.textContent = "No equipment available.";
     return;
   }
@@ -210,12 +219,12 @@ export function updateEquipmentTable(equipment) {
     <th>Updated By</th>
     <th>Status</th>
     <th colspan="2">Actions</th>
-      </tr>
+  </tr>
   `;
 
   equipment.forEach((item) => {
     if (!item || typeof item !== "object") {
-      console.warn('Skipping invalid item', item)
+      console.warn('Skipping invalid item', item);
       return;
     }
 
@@ -233,49 +242,65 @@ export function updateEquipmentTable(equipment) {
     <td><button id="delete-button" data-id="${item._id}">Delete</button></td>
     `;
 
-    row.querySelector("#edit-button").addEventListener("click", () => fetchEquipmentById(item._id));
+    row.querySelector("#edit-button").addEventListener("click", async (e) => {
+      const equipmentId = e.target.dataset.id;
+      console.log("✅ Edit Button Clicked - Equipment ID:", equipmentId);
+
+      const equipment = await fetchEquipmentById(equipmentId);
+
+      if (!equipment) {
+        console.error("❌ Error: Could not load equipment data.");
+        return;
+      }
+
+      console.log("✅ Calling showEditForm()...");
+      showEditForm(equipment);
+    });
+
     row.querySelector("#delete-button").addEventListener("click", () => deleteEquipment(item._id));
-    
+
     equipmentTable.appendChild(row);
   });
 
-  console.log('table successfully updated')
+  console.log('table successfully updated');
 }
 
-export async function fetchEquipmentById(id) {
-  if (!id || typeof id !== "string") {
-    console.error("fetchEquipmentById: Invalid ID received:", id);
-    return;
+
+
+export async function fetchEquipmentById(equipmentId) {
+  if(!equipmentId) {
+    console.error('fetchEquipmentById: missing equipmentId')
+    return null;
   }
 
-  console.log("Fetching equipment by ID:", id);
-
   try {
-    const authToken = localStorage.getItem("token");
-    const response = await fetch(`${API_URL}/equipment/${id}`, {
-      method: "GET",
-      headers: { Authorization: `Bearer ${authToken}` },
-    });
+    const response = await fetch(`${API_URL}/equipment/${equipmentId}`, {
+      method: 'GET',
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+    })
 
     if (!response.ok) {
       console.error("API request failed, status:", response.status);
       throw new Error("Failed to fetch equipment");
     }
 
-    const data = await response.json();
-    console.log("✅ Equipment data received:", data);
+    const equipmentData = await response.json();
+    console.log("✅ Equipment data received:", equipmentData);
 
-    if (!data || typeof data.equipment !== "object") {
-      console.error("Invalid data format:", data);
+    if (!equipmentData || typeof equipmentData !== "object") {
+      console.error("No equipment data received");
       return;
     }
 
-    showEditForm(data.equipment);
+    return equipmentData;
   } catch (error) {
     console.error("Error fetching equipment by ID:", error);
     message.textContent = "Error loading equipment.";
+    return null;
   }
 }
+
+
 
 
 export async function deleteEquipment(id) {
