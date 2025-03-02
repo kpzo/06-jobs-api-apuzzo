@@ -46,9 +46,18 @@ const EquipmentSchema = new mongoose.Schema({
     remarks: {
         type: String,
         maxlength: 100
+    },
+    updatedAt: {
+        type: Date,
+        default: () => new Date().toLocaleString('en-US', { timeZone: 'UTC' }),
+        required: [true]
+    },
+    updatedBy: {
+        type: String,
+        required: [true, 'Please provide updater name']
     }
 }, 
-{ timestamps: true}
+{ timestamps: true }
 )
 
 module.exports = mongoose.model('Equipment', EquipmentSchema)

@@ -56,17 +56,48 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 export async function showEquipment() {
-  equipmentDiv = document.getElementById("equipment-div");
-  equipmentTable = document.getElementById("equipment-table");
+  const equipmentDiv = document.getElementById("equipment-div");
+  const message = document.getElementById("equipment-message");
+  const equipmentTable = document.getElementById("equipment-table");
   const addEquipmentDiv = document.getElementById("add-equipment-div");
+  const editEquipmentDiv = document.getElementById("edit-equipment-div");
 
-  if(addEquipmentDiv.style.display !== "block") {
-    setDiv(equipmentDiv);
+  try {
+    const response = await fetch(`${API_URL}/equipment`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    if (!response.ok) throw new Error("Failed to fetch equipment");
+
+    let { equipment } = await response.json();
+    if (!Array.isArray(equipment)) {
+      equipment = [equipment];  // Ensure it's always an array
+    }
+
+    console.log('Equipment data received:', equipment);
+
+    if (equipment.length === 0) {
+      console.warn("⚠️ No equipment found.");
+      if (message) message.textContent = "No equipment available.";
+      return;
+    }
+
+    updateEquipmentTable(equipment); // Update the table with the fetched equipment
+
+  } catch (error) {
+    console.error("❌ Error fetching equipment:", error);
+    if (message) message.textContent = "Error loading equipment.";
   }
-  setupEventListeners();
-  await fetchAndDisplayEquipment();
-
+  
+  // Hide add & edit forms, show equipment list
+  addEquipmentDiv.style.display = "none";
+  editEquipmentDiv.style.display = "none";
+  equipmentDiv.style.display = "block";
+  equipmentTable.style.display = "block";
 }
+
+
+
 
 let eventListenerSet = false;
 
@@ -137,7 +168,6 @@ export async function addEquipment(equipmentId) {
       }),
     });
 
-
     console.log('request headers:', response.headers)
     console.log('request status:', response.status)
 
@@ -187,19 +217,21 @@ export async function fetchAndDisplayEquipment() {
 
 
 
+
 export function updateEquipmentTable(equipment) {
+  
   const equipmentTable = document.getElementById("equipment-table");
   const message = document.getElementById("message");
   console.log('equipment data received:', equipment);
 
-  // if (!equipment || !Array.isArray(equipment)) {
-  //   console.error("updateEquipmentTable: Invalid equipment data received:", equipment);
-  //   message.textContent = "Invalid equipment data.";
-  //   return;
-  // }
-
   if (!equipmentTable) {
     console.error("updateEquipmentTable: No equipment table found");
+    return;
+  }
+
+  if (!equipment || !Array.isArray(equipment)) {
+    console.error("updateEquipmentTable: Invalid equipment data received:", equipment);
+    message.textContent = "Invalid equipment data.";
     return;
   }
 
@@ -208,6 +240,7 @@ export function updateEquipmentTable(equipment) {
     return;
   }
 
+  // clear tables and add headers
   equipmentTable.innerHTML = `
   <tr>
     <th>Brand</th>
@@ -230,40 +263,46 @@ export function updateEquipmentTable(equipment) {
 
     const row = document.createElement("tr");
     row.innerHTML = `
-    <td>${item.brand}</td>
-    <td>${item.mount}</td>
-    <td>${item.focalLength}</td>
-    <td>${item.aperture}</td>
-    <td>${item.version}</td>
-    <td>${item.serialNumber}</td>
-    <td>${item.updatedBy}</td>
-    <td>${item.status}</td>
-    <td><button id="edit-button" data-id="${item._id}">Edit</button></td>
-    <td><button id="delete-button" data-id="${item._id}">Delete</button></td>
+      <td>${item.brand || "N/A"}</td>
+      <td>${item.mount || "N/A"}</td>
+      <td>${item.focalLength || "N/A"}</td>
+      <td>${item.aperture || "N/A"}</td>
+      <td>${item.version || "N/A"}</td>
+      <td>${item.serialNumber || "N/A"}</td>
+      <td>${item.updatedBy || "N/A"}</td>
+      <td>${item.status || "N/A"}</td>
+      <td><button class="edit-button" data-id="${item._id}">Edit</button></td>
+      <td><button class="delete-button" data-id="${item._id}">Delete</button></td>
     `;
 
-    row.querySelector("#edit-button").addEventListener("click", async (e) => {
+
+    row.querySelector(".edit-button").addEventListener("click", async (e) => {
       const equipmentId = e.target.dataset.id;
       console.log("✅ Edit Button Clicked - Equipment ID:", equipmentId);
 
-      const equipment = await fetchEquipmentById(equipmentId);
+      const equipmentData = await fetchEquipmentById(equipmentId);
 
-      if (!equipment) {
+      if (!equipmentData) {
         console.error("❌ Error: Could not load equipment data.");
         return;
       }
 
       console.log("✅ Calling showEditForm()...");
-      showEditForm(equipment);
+      showEditForm(equipmentData);
     });
 
-    row.querySelector("#delete-button").addEventListener("click", () => deleteEquipment(item._id));
+    row.querySelector(".delete-button").addEventListener("click", async (e) => {
+    const equipmentId = e.target.dataset.id;
+    console.log('delete equipment id:', equipmentId)
+    await deleteEquipment(equipmentId);
+    await fetchAndDisplayEquipment();
+  })
 
-    equipmentTable.appendChild(row);
-  });
-
+  equipmentTable.appendChild(row);
+})
   console.log('table successfully updated');
 }
+
 
 
 

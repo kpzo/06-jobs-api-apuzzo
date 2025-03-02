@@ -1,6 +1,6 @@
 
 import { enableInput, inputEnabled, message, setDiv, token } from "./index.js";
-import { fetchAndDisplayEquipment, addEquipment, fetchEquipmentById, deleteEquipment, updateEquipmentTable } from "./equipment.js";
+import { fetchAndDisplayEquipment, addEquipment, fetchEquipmentById, deleteEquipment, updateEquipmentTable, showEquipment } from "./equipment.js";
 import { showWelcome } from "./welcome.js";
 
 const API_URL = "http://localhost:5000/api/v1";
@@ -12,11 +12,14 @@ const welcomeDiv = document.getElementById("welcome-div");
 const goBackButton = document.getElementById("go-back-button");
 const submitAddButton = document.getElementById("submit-add-button");
 const equipmentDiv = document.getElementById("equipment-div");
+const editEquipmentDiv = document.getElementById("edit-equipment-div");
+const equipmentMessage = document.getElementById("equipment-message");
 const userRole = JSON.parse(localStorage.getItem("user")).role;
 const viewAllEquipmentButton = document.getElementById("view-all-equipment-button");
 const submitUpdateButton = document.getElementById("submit-update-button");
 const deleteEquipmentButton = document.getElementById("delete-equipment-button");
 const editCancelButton = document.getElementById("edit-cancel-button");
+const backToEquipmentButton = document.getElementById("back-to-equipment-button");
 
   window.addEventListener("beforeunload", () => {
     const user = JSON.parse(localStorage.getItem("user"));
@@ -41,13 +44,12 @@ const editCancelButton = document.getElementById("edit-cancel-button");
   submitUpdateButton.addEventListener("click", async (e) => {
     e.preventDefault()
     enableInput(true);
-    const equipmentId = document.getElementById('edit-form').dataset.equipmentId;
-    const updatedBy = document.getElementById('edit-updated-by').value
-    const status = document.getElementById('edit-status').value
-    if (updatedBy && status ) {
-      await updateEquipmentTable(equipmentId);
+
+    if (submitUpdateButton) {
+    console.log('submitUpdateButton clicked')
+    await (updateEquipment())
     } else {
-      message.textContent = "Please fill in all required fields.";
+      equipmentMessage.textContent = "Please fill in all required fields.";
     }
   });
 
@@ -64,12 +66,28 @@ const editCancelButton = document.getElementById("edit-cancel-button");
   submitAddButton.addEventListener("click", async (e) => {
     e.preventDefault();
     enableInput(true);
+    const brand = document.getElementById("brand").value;
+    const mount = document.getElementById("mount").value;
+    const focalLength = document.getElementById("focal-length").value;
+    const aperture = document.getElementById("aperture").value;
+    const version = document.getElementById("version").value;
+    const serialNumber = document.getElementById("serial-number").value;
+    const updatedBy = document.getElementById("updated-by").value;
+    const status = document.getElementById("status").value;
+
     const fields = brand && mount && focalLength && aperture && version && serialNumber && updatedBy && status;
     if (fields) {
       await addEquipment();
+      fetchAndDisplayEquipment();
     } else {
       message.textContent = "Please fill in all required fields.";
     }
+  });
+  
+  backToEquipmentButton.addEventListener("click", (e) => {
+    e.preventDefault();
+    console.log('back to equipment button clicked')
+    showEquipment();
   });
 
   goBackButton.addEventListener("click", (e) => {
@@ -133,10 +151,10 @@ const editCancelButton = document.getElementById("edit-cancel-button");
   
             console.log("✅ Equipment deleted successfully.");
             fetchAndDisplayEquipment();
-            message.textContent = "Equipment deleted successfully.";
+            equipmentMessage.textContent = "Equipment deleted successfully.";
           } catch (error) {
             console.error("❌ Error deleting equipment:", error);
-            document.getElementById("equipment-message").textContent = "Error deleting equipment.";
+            equipmentMessage.textContent = "Error deleting equipment.";
           }
         }
       } else {
@@ -189,6 +207,9 @@ export async function showEditForm(equipmentData) {
   const apertureText = document.getElementById("edit-aperture-text");
   const versionText = document.getElementById("edit-version-text");
   const serialNumberText = document.getElementById("edit-serial-number-text");
+  const updatedAtText = document.getElementById("edit-updated-at-text");
+  const formattedDate = new Date(equipment.updatedAt).toLocaleString();
+
 
   // Editable fields (Inputs)
   const updatedByInput = document.getElementById("edit-updated-by");
@@ -221,6 +242,7 @@ export async function showEditForm(equipmentData) {
       if (apertureText) apertureText.textContent = equipment.aperture || "N/A";
       if (versionText) versionText.textContent = equipment.version || "N/A";
       if (serialNumberText) serialNumberText.textContent = equipment.serialNumber || "N/A";
+      if (updatedAtText) updatedAtText.textContent = formattedDate || "N/A";
 
       // Assign values to editable fields
       if (updatedByInput) updatedByInput.value = equipment.updatedBy || "";
@@ -234,10 +256,15 @@ export async function showEditForm(equipmentData) {
   }, 500);
 }
 
+
+
 export const updateEquipment = async (equipmentId) => {
   enableInput(true);
 
-  if(!equipmentId) {
+  const equipmentData = document.getElementById("edit-form").dataset.equipmentId;
+  console.log('equipmentData', equipmentData)
+
+  if(!equipmentData) {
     console.error('missing equipmentId in updateEquipment function')
     return
   }
@@ -246,10 +273,15 @@ export const updateEquipment = async (equipmentId) => {
   const status = document.getElementById("edit-status").value;
   const remarks = document.getElementById("edit-remarks").value;
 
+  if (!updatedBy || !status) {
+    message.textContent = "Please fill in all required fields.";
+    return;
+  }
+
   console.log("Updating equipment...");
 
   try {
-    const response = await fetch(`${API_URL}/equipment/${equipmentId}`, {
+    const response = await fetch(`${API_URL}/equipment/${equipmentData}`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
@@ -265,8 +297,11 @@ export const updateEquipment = async (equipmentId) => {
 
     console.log("✅ Equipment updated successfully.");
     await fetchAndDisplayEquipment();
+    setDiv(document.getElementById("equipment-div"));
+    equipmentMessage.textContent = "Equipment updated successfully.";
+
   } catch (error) {
-    document.getElementById("equipment-message").textContent = "Error updating equipment.";
+    equipmentMessage.textContent = "Error updating equipment.";
   }
 }
 

@@ -93,9 +93,12 @@
         <th>Focal Length</th>
         <th>Aperture</th>
         <th>Version</th>
+        <th>Serial Number</th>
         <th>Status</th>
         <th>Updated By</th>
-        <th colspan="2"></th>
+        <th>Remarks</th>
+        <th>Updated At</th>
+        <th colspan="2">Actions</th>
       </tr>
     </table>
     <button type="button" id="logoff-from-equipment-button">Log Out</button>
@@ -114,13 +117,14 @@
     <p><strong>Aperture:</strong> <span id="edit-aperture-text"></span></p>
     <p><strong>Version:</strong> <span id="edit-version-text"></span></p>
     <p><strong>Serial Number:</strong> <span id="edit-serial-number-text"></span></p>
+    <p><strong>Updated At:</strong> <span id="edit-updated-at-text"></span></p>
 
     <!-- Editable fields -->
     <label for="edit-updated-by">Updated By:</label>
-    <input type="text" id="edit-updated-by" />
+    <input type="text" id="edit-updated-by" required />
 
     <label for="edit-status">Status:</label>
-    <select id="edit-status">
+    <select id="edit-status" required>
       <option value="available">Available</option>
       <option value="retired">Retired</option>
       <option value="in-use">In Use</option>
@@ -131,6 +135,7 @@
     <label for="edit-remarks">Remarks:</label>
     <textarea id="edit-remarks"></textarea>
 
+    <button type="button" id="back-to-equipment-button">Go Back to All Equipment</button>
     <button type="submit" id="submit-update-button">Update</button>
     <button type="button" id="delete-equipment-button">Delete</button>
     <button type="button" id="edit-cancel-button">Cancel</button>
