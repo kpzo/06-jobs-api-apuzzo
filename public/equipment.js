@@ -150,21 +150,21 @@ export async function addEquipment(equipmentId) {
     return;
   } 
   try {
-    const response = await fetch(`${API_URL}/equipment/${equipmentId}`, {
-      method: "PUT",
+    const response = await fetch(`${API_URL}/equipment`, {
+      method: "POST",
       headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${authToken}`,
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${authToken}`,
       },
       body: JSON.stringify({
-        brand,
-        mount,
-        focalLength,
-        aperture,
-        version,
-        serialNumber,
-        updatedBy,
-        status,
+      brand,
+      mount,
+      focalLength,
+      aperture,
+      version,
+      serialNumber,
+      updatedBy,
+      status,
       }),
     });
 

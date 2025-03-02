@@ -66,14 +66,14 @@ const backToEquipmentButton = document.getElementById("back-to-equipment-button"
   submitAddButton.addEventListener("click", async (e) => {
     e.preventDefault();
     enableInput(true);
-    const brand = document.getElementById("brand").value;
-    const mount = document.getElementById("mount").value;
-    const focalLength = document.getElementById("focal-length").value;
-    const aperture = document.getElementById("aperture").value;
-    const version = document.getElementById("version").value;
-    const serialNumber = document.getElementById("serial-number").value;
-    const updatedBy = document.getElementById("updated-by").value;
-    const status = document.getElementById("status").value;
+    const brand = document.getElementById("add-brand").value;
+    const mount = document.getElementById("add-mount").value;
+    const focalLength = document.getElementById("add-focal-length").value;
+    const aperture = document.getElementById("add-aperture").value;
+    const version = document.getElementById("add-version").value;
+    const serialNumber = document.getElementById("add-serial-number").value;
+    const updatedBy = document.getElementById("add-updated-by").value;
+    const status = document.getElementById("add-status").value;
 
     const fields = brand && mount && focalLength && aperture && version && serialNumber && updatedBy && status;
     if (fields) {
