@@ -6,7 +6,6 @@ const auth = async (req, res, next) => {
 
     const authHeader = req.headers.authorization
 
-
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
         console.error('auth middleware: no token provided')
         return next()
@@ -17,9 +16,9 @@ const auth = async (req, res, next) => {
     try {
         const payload = jwt.verify(token, process.env.JWT_SECRET)
         req.user = {
-            userId: payload.userId,
+            id: payload.id || payload.userId,
             name: payload.name,
-            role: payload.role
+            role: payload.role || 'user'
         }
         console.log('auth middleware: user authenticated', req.user)
         next()

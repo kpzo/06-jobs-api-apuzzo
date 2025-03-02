@@ -23,8 +23,15 @@ export const setToken = (value) => {
   token = value;
   if (value) {
     localStorage.setItem("token", value);
-    const userRole = JSON.parse(atob(value.split(".")[1])).role;
-    localStorage.setItem("role", userRole);
+    try {
+      const decodedPayload = JSON.parse(atob(value.split(".")[1]));
+      console.log("Decoded JWT Payload:", decodedPayload);
+    
+      const userRole = decodedPayload.role || 'user';
+      localStorage.setItem("role", userRole);
+    } catch (error) {
+      console.error("Error decoding token:", error);
+    }
   } else {
     localStorage.removeItem("token");
     localStorage.removeItem("role");
@@ -37,9 +44,14 @@ export const formatDate = (dateString) => {
 };
 
 export const handleLogoff = () => {
-  setToken(null);
-  if (message) message.textContent = "You have been logged off.";
-  showLoginRegister();
+  if (confirm("Are you sure you want to log off?")) {
+    setToken(null);
+    if (message) message.textContent = "You have been logged off.";
+    console.log("User logged off.");
+    if (!token) {
+      showLoginRegister();
+    }
+  }
 };
 
 export let message = null;

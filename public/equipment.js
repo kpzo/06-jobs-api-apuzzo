@@ -26,6 +26,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  document.getElementById('back-to-all-equipment').addEventListener('click', (e) => {  
+      e.preventDefault();
+      console.log('back to equipment button from add page clicked')
+      showEquipment();
+    });
+
   document.getElementById("equipment-table").addEventListener("click", async (e) => {
     if (e.target.id === "edit-button") {
       console.log("🛠️ Edit button clicked, fetching equipment...");
@@ -219,9 +225,9 @@ export async function fetchAndDisplayEquipment() {
 
 
 export function updateEquipmentTable(equipment) {
-  
   const equipmentTable = document.getElementById("equipment-table");
   const message = document.getElementById("message");
+  const welcomeAddEquipmentButton = document.getElementById("add-equipment-button");
   console.log('equipment data received:', equipment);
 
   if (!equipmentTable) {
@@ -240,6 +246,14 @@ export function updateEquipmentTable(equipment) {
     return;
   }
 
+  const user = JSON.parse(localStorage.getItem("user"));
+  const userRole = user ? user.role : "user";
+  console.log('user role in table:', userRole);
+
+  if (userRole === 'user' && welcomeAddEquipmentButton) {
+    welcomeAddEquipmentButton.style.display = "none";
+  }
+
   // clear tables and add headers
   equipmentTable.innerHTML = `
   <tr>
@@ -251,7 +265,7 @@ export function updateEquipmentTable(equipment) {
     <th>Serial Number</th>
     <th>Updated By</th>
     <th>Status</th>
-    <th colspan="2">Actions</th>
+    ${userRole === 'user' ? '' : "<th colspan='2'>Actions</th>"}
   </tr>
   `;
 
@@ -271,11 +285,16 @@ export function updateEquipmentTable(equipment) {
       <td>${item.serialNumber || "N/A"}</td>
       <td>${item.updatedBy || "N/A"}</td>
       <td>${item.status || "N/A"}</td>
+      ${
+        userRole === 'user'
+        ? ''
+        : `
       <td><button class="edit-button" data-id="${item._id}">Edit</button></td>
       <td><button class="delete-button" data-id="${item._id}">Delete</button></td>
-    `;
+      `
+    }`;
 
-
+    if (userRole !== 'user') {
     row.querySelector(".edit-button").addEventListener("click", async (e) => {
       const equipmentId = e.target.dataset.id;
       console.log("✅ Edit Button Clicked - Equipment ID:", equipmentId);
@@ -292,14 +311,15 @@ export function updateEquipmentTable(equipment) {
     });
 
     row.querySelector(".delete-button").addEventListener("click", async (e) => {
-    const equipmentId = e.target.dataset.id;
-    console.log('delete equipment id:', equipmentId)
-    await deleteEquipment(equipmentId);
-    await fetchAndDisplayEquipment();
-  })
+      const equipmentId = e.target.dataset.id;
+      console.log('delete equipment id:', equipmentId)
+      await deleteEquipment(equipmentId);
+      await fetchAndDisplayEquipment();
+    })
+  }
 
-  equipmentTable.appendChild(row);
-})
+    equipmentTable.appendChild(row);
+  })
   console.log('table successfully updated');
 }
 

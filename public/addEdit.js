@@ -182,7 +182,6 @@ export const showAddEquipmentForm = () => {
 
 
 export async function showEditForm(equipmentData) {
-
   console.log("Showing edit equipment form...", equipmentData);
   enableInput(true);
 
@@ -191,14 +190,22 @@ export async function showEditForm(equipmentData) {
     await new Promise((resolve) => document.addEventListener("DOMContentLoaded", resolve));
   }
 
+  const user = JSON.parse(localStorage.getItem("user"));
+  const userRole = user ? user.role : 'user';
+
   const equipment = equipmentData.equipment || equipmentData;
 
   // Get Elements
   const editEquipmentDiv = document.getElementById("edit-equipment-div");
+  const welcomeAddEquipmentButton = document.getElementById("add-equipment-after-login-button");
   const editForm = document.getElementById("edit-form");
   const equipmentDiv = document.getElementById("equipment-div");
 
   editForm.dataset.equipmentId = equipmentData._id || "";
+
+  if (userRole === 'user' && welcomeAddEquipmentButton) {
+    welcomeAddEquipmentButton.style.display = 'none';
+  }
 
   // Non-editable fields (Static Text)
   const brandText = document.getElementById("edit-brand-text");
@@ -222,7 +229,6 @@ export async function showEditForm(equipmentData) {
   // Show form and hide equipment list
   equipmentDiv.style.display = "none";
   editEquipmentDiv.style.display = "block";
-  editForm.style.display = "block";
   
 
   setTimeout(() => {

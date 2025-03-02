@@ -3,23 +3,30 @@ const router = express.Router();
 const { StatusCodes } = require('http-status-codes');
 const User = require('../models/User');
 const { BadRequestError, UnauthenticatedError } = require('../errors');
+const jwt = require('jsonwebtoken');
 
 // Register user
 const register = async (req, res) => {
+     
     try{
-  const user = await User.create({ ...req.body });
-  const token = user.createJWT();
+        const user = await User.create({ ...req.body });
 
-  res.status(StatusCodes.CREATED).json({ 
-    user: { id: user._id, name: user.name, role: userRole }, 
-    token, 
-    role: userRole });
-} catch (error) {
-    res.status(StatusCodes.BAD_REQUEST).json({ error: error.message });
-}
-if (error.code && error.code === 11000) {
-    return res.status(StatusCodes.CONFLICT).json({ error: "Duplicate value error: A user with this email already exists." });
-}
+    const token = jwt.sign(
+        { id: user._id, name: user.name, role: user.role },
+        process.env.JWT_SECRET,
+        { expiresIn: "1d" }
+    );
+        res.status(StatusCodes.CREATED).json({ 
+            user: { id: user._id, name: user.name, role: user.role }, 
+            token, 
+            role: user.role 
+        });
+    } catch (error) {
+        if (error.code && error.code === 11000) {
+            return res.status(StatusCodes.CONFLICT).json({ error: "Duplicate value error: A user with this email already exists." });
+        } 
+        res.status(StatusCodes.BAD_REQUEST).json({ error: error.message });
+    }
 };
 
 // Login user

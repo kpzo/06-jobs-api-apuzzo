@@ -37,15 +37,23 @@ document.addEventListener("DOMContentLoaded", () => {
   registerNowButton.addEventListener("click", async (e) => {
     e.preventDefault();  
 
-      if (name.value === "" || email1.value === "" || password1.value === "" || password2.value === "") {
-        message.textContent = "All fields are required.";
-        return;
-      } 
+    if (!name.value || !email1.value || !password1.value || !password2.value) {
+      message.textContent = "All fields are required.";
+      return;
+    }
 
-      if (password1.value !== password2.value) {
-        message.textContent = "The passwords entered do not match.";
-        return;
-      }
+    if (password1.value !== password2.value) {
+      message.textContent = "The passwords entered do not match.";
+      return;
+    }
+
+    if (!roleInput || !roleInput.value) {
+      message.textContent = "Please select a role.";
+      console.error("Role not selected.");
+      return;
+    }
+
+    console.log('Role selected:', roleInput.value);
 
       enableInput(false);
 
@@ -66,31 +74,30 @@ document.addEventListener("DOMContentLoaded", () => {
         
       const data = await response.json();
 
+      console.log('fetch response registerNowButton', response)
+      console.log('fetch data registerNowButton', data)
 
-        console.log('fetch response registerNowButton', response)
-        console.log('fetch data registerNowButton', data)
+      if (response.status === 201) {
+        message.textContent = `Registration successful.  Welcome ${data.user.name}`;
+        setToken(data.token);
 
-        if (response.status === 201) {
-          message.textContent = `Registration successful.  Welcome ${data.user.name}`;
-          setToken(data.token);
+        name.value = "";
+        email1.value = "";
+        password1.value = "";
+        password2.value = "";
 
-          name.value = "";
-          email1.value = "";
-          password1.value = "";
-          password2.value = "";
-
-          showWelcome();
-            } else {
-              message.textContent = data.msg;
-            }
-          } catch (err) {
-            console.error(err);
-            message.textContent = "A communications error occurred.";
-          }
-        })
-
-        enableInput(true);
-      })
+        showWelcome();
+      } else {
+        message.textContent = data.error || "An error occurred.";
+      }
+    } catch (err) {
+      console.error(err);
+      message.textContent = "A communications error occurred.";
+    } finally {
+      enableInput(true);
+    }
+  });
+})
 
 export const showRegister = () => {
   if (!registerDiv) {

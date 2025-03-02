@@ -10,20 +10,24 @@ document.addEventListener('DOMContentLoaded', function() {
     const welcomeDiv = document.getElementById('welcome-div');
     const equipmentDiv = document.getElementById('equipment-div');
     const addEquipmentDiv = document.getElementById('add-equipment-div');
+
     const welcomeViewEquipmentButton = document.getElementById('view-equipment-after-login-button');
     const welcomeAddEquipmentButton = document.getElementById('add-equipment-after-login-button');
     const logoutFromWelcomeButton = document.getElementById('logoff-button');
     const goBackButton = document.getElementById('go-back-button');
     const requestAccessButton = document.getElementById('request-access-button');
+
     const user = JSON.parse(localStorage.getItem('user'));
     const userRole = user ? user.role : null;
-    const roleInput = document.getElementById('role');
-    if (roleInput) {
-        roleInput.value = userRole;
-    } else {
-        console.error("❌ roleInput not found in DOM!");
-    }
     
+    welcomeViewEquipmentButton.style.display = 'none';
+    welcomeAddEquipmentButton.style.display = 'none';
+    logoutFromWelcomeButton.style.display = 'none';
+    requestAccessButton.style.display = 'none';
+    goBackButton.style.display = 'none';
+    addEquipmentDiv.style.display = 'none';
+
+
     window.addEventListener("beforeunload", () => {
         const user = JSON.parse(localStorage.getItem("user"));
         if (user) {
@@ -31,20 +35,14 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       });
 
-    
-    setDiv(welcomeDiv);
-
-    goBackButton.style.display = 'block';
-    welcomeViewEquipmentButton.style.display = 'block';
-    welcomeAddEquipmentButton.style.display = 'block';
-    welcomeDiv.style.display = 'block';
-    logoutFromWelcomeButton.style.display = 'block';
-
-    if (goBackButton) {
-        goBackButton.addEventListener('click', (e) => {
-            e.preventDefault();
-            setDiv(welcomeDiv);
-        }); 
+    if(userRole === 'user') {
+        welcomeViewEquipmentButton.style.display = 'block';
+        logoutFromWelcomeButton.style.display = 'block';
+        requestAccessButton.style.display = 'block';
+    } else if (userRole === 'staff' || userRole === 'admin') {
+        welcomeViewEquipmentButton.style.display = 'block';
+        welcomeAddEquipmentButton.style.display = 'block';
+        logoutFromWelcomeButton.style.display = 'block';
     }
 
     if (welcomeViewEquipmentButton) {
@@ -76,7 +74,6 @@ document.addEventListener('DOMContentLoaded', function() {
             
         });
     }
-
     
     if (logoutFromWelcomeButton) {
         logoutFromWelcomeButton.addEventListener('click', (e) => {
@@ -96,44 +93,35 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
+    setDiv(welcomeDiv);
     setupEventListeners();
   })
 
 export const showWelcome = () => {
     const welcomeDiv = document.getElementById('welcome-div');
-    const equipmentDiv = document.getElementById('equipment-div');
     const welcomeViewEquipmentButton = document.getElementById('view-equipment-after-login-button');
     const welcomeAddEquipmentButton = document.getElementById('add-equipment-after-login-button');
     const logoutFromWelcomeButton = document.getElementById('logoff-button');
     const goBackButton = document.getElementById('go-back-button');
     const requestAccessButton = document.getElementById('request-access-button');
+
     const user = JSON.parse(localStorage.getItem('user'));
-    const userRole = user ? user.role : null;
-    const roleInput = document.getElementById('role');
-    roleInput.value = userRole;
-    
-    setDiv(welcomeDiv);
+    const userRole = user ? user.role : 'user';
+
+    if (userRole === 'admin' || userRole === 'staff') {
+        welcomeAddEquipmentButton.style.display = 'block';
+        requestAccessButton.style.display = 'none';
+    } else {
+        welcomeAddEquipmentButton.style.display = 'none';
+        requestAccessButton.style.display = 'block';
+    }
     
     goBackButton.style.display = 'block';
     welcomeViewEquipmentButton.style.display = 'block';
-    welcomeAddEquipmentButton.style.display = 'block';
-    equipmentDiv.style.display = 'none';
-    welcomeDiv.style.display = 'block';
-    roleInput.value = userRole;
+    logoutFromWelcomeButton.style.display = 'block';
 
-    if (userRole === 'admin' || userRole === 'staff') {
-        setDiv(welcomeDiv);
-        welcomeViewEquipmentButton.style.display = 'block';
-        welcomeAddEquipmentButton.style.display = 'block';
-        logoutFromWelcomeButton.style.display = 'block';    
-        requestAccessButton.style.display = 'none';
-    } else {
-        setDiv(welcomeDiv);
-        welcomeViewEquipmentButton.style.display = 'block';
-        welcomeAddEquipmentButton.style.display = 'none';
-        logoutFromWelcomeButton.style.display = 'block';
-        requestAccessButton.style.display = 'block';
-    }
+    setDiv(welcomeDiv);
+    setupEventListeners();
 }
 
 export const requestAccess = () => {
