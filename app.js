@@ -19,6 +19,7 @@ const connectDB = require('./db/connect');
 // routers
 const authRouter = require('./routes/auth');
 const equipmentRouter = require('./routes/equipment');
+const requestAccessRoute = require('./routes/request-access');
 
 
 // set security middleware
@@ -51,6 +52,7 @@ app.get("/", (req, res) => {
 // routes
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/equipment', equipmentRouter);
+app.use('/api/v1/request-access', requestAccessRoute);
 
 
 // error handler

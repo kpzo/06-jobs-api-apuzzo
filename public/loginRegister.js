@@ -15,7 +15,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const registerButton = document.getElementById("register-button");
   const viewEquipmentAfterLoginButton = document.getElementById("view-equipment-after-login-button");
   const viewAllEquipmentButton = document.getElementById("view-all-equipment-button");
-  const goBackButton = document.getElementById("go-back-button");
   const user = JSON.parse(localStorage.getItem("user"));
   const userRole = user ? user.role : null;
   const roleInput = document.getElementById("role");
@@ -33,7 +32,6 @@ document.addEventListener("DOMContentLoaded", () => {
   registerButton.style.display = "block";
   viewEquipmentAfterLoginButton.style.display = "none";
   viewAllEquipmentButton.style.display = "none";
-  goBackButton.style.display = "block";
 
   handleLoginRegister();
 

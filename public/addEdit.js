@@ -1,6 +1,6 @@
 
 import { enableInput, inputEnabled, message, setDiv, token } from "./index.js";
-import { fetchAndDisplayEquipment, addEquipment, fetchEquipmentById, deleteEquipment, updateEquipmentTable, showEquipment } from "./equipment.js";
+import { fetchAndDisplayEquipment, addEquipment, fetchEquipmentById, deleteEquipment, showEquipment } from "./equipment.js";
 import { showWelcome } from "./welcome.js";
 
 const API_URL = "http://localhost:5000/api/v1";
@@ -88,12 +88,6 @@ const backToEquipmentButton = document.getElementById("back-to-equipment-button"
     e.preventDefault();
     console.log('back to equipment button clicked')
     showEquipment();
-  });
-
-  goBackButton.addEventListener("click", (e) => {
-    e.preventDefault();
-    setDiv(welcomeDiv);
-    showWelcome();
   });
 
   addEquipmentDiv.addEventListener("click", async (e) => {

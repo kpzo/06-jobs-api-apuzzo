@@ -15,7 +15,6 @@ import { showAddEquipmentForm, showEditForm } from "./addEdit.js";
 
 const API_URL = "http://localhost:5000/api/v1";
 
-let equipmentDiv;
 
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -24,6 +23,11 @@ document.addEventListener("DOMContentLoaded", () => {
     if (user) {
       localStorage.setItem("user", JSON.stringify(user));  // ✅ Resave user info
     }
+  });
+
+  document.getElementById('back-to-welcome').addEventListener('click', (e) => {
+    e.preventDefault();
+    showWelcome();
   });
 
   document.getElementById('back-to-all-equipment').addEventListener('click', (e) => {  
@@ -123,11 +127,6 @@ export function setupEventListeners() {
   
   document.getElementById('add-equipment-button').addEventListener('click', showAddEquipmentForm);
   
-  document.getElementById('go-back-button').addEventListener('click', (e) => {
-    const addEquipmentDiv = document.getElementById('add-equipment-div');
-    showLoginRegister();
-    addEquipmentDiv.style.display = "none";
-  });
 }
 
 
@@ -228,6 +227,11 @@ export function updateEquipmentTable(equipment) {
   const equipmentTable = document.getElementById("equipment-table");
   const message = document.getElementById("message");
   const welcomeAddEquipmentButton = document.getElementById("add-equipment-button");
+  const backToWelcomeButton = document.getElementById("back-to-welcome");
+
+  if (backToWelcomeButton) {
+    backToWelcomeButton.style.display = "block";
+  }
   console.log('equipment data received:', equipment);
 
   if (!equipmentTable) {

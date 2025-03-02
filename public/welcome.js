@@ -14,7 +14,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const welcomeViewEquipmentButton = document.getElementById('view-equipment-after-login-button');
     const welcomeAddEquipmentButton = document.getElementById('add-equipment-after-login-button');
     const logoutFromWelcomeButton = document.getElementById('logoff-button');
-    const goBackButton = document.getElementById('go-back-button');
     const requestAccessButton = document.getElementById('request-access-button');
 
     const user = JSON.parse(localStorage.getItem('user'));
@@ -24,7 +23,6 @@ document.addEventListener('DOMContentLoaded', function() {
     welcomeAddEquipmentButton.style.display = 'none';
     logoutFromWelcomeButton.style.display = 'none';
     requestAccessButton.style.display = 'none';
-    goBackButton.style.display = 'none';
     addEquipmentDiv.style.display = 'none';
 
 
@@ -48,8 +46,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if (welcomeViewEquipmentButton) {
         welcomeViewEquipmentButton.addEventListener('click', (e) => {
             e.preventDefault();
-
-            goBackButton.style.display = 'block';
             if (token) {
                 setDiv(equipmentDiv);
                 fetchAndDisplayEquipment();
@@ -62,9 +58,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if (welcomeAddEquipmentButton) {
         welcomeAddEquipmentButton.addEventListener('click', (e) => {
             e.preventDefault();
-
-            goBackButton.style.display = 'block';
-            addEquipmentDiv.style.display = 'block';
             if (token) {
                 setDiv(addEquipmentDiv);
                 showAddEquipmentForm();
@@ -102,7 +95,6 @@ export const showWelcome = () => {
     const welcomeViewEquipmentButton = document.getElementById('view-equipment-after-login-button');
     const welcomeAddEquipmentButton = document.getElementById('add-equipment-after-login-button');
     const logoutFromWelcomeButton = document.getElementById('logoff-button');
-    const goBackButton = document.getElementById('go-back-button');
     const requestAccessButton = document.getElementById('request-access-button');
 
     const user = JSON.parse(localStorage.getItem('user'));
@@ -116,7 +108,6 @@ export const showWelcome = () => {
         requestAccessButton.style.display = 'block';
     }
     
-    goBackButton.style.display = 'block';
     welcomeViewEquipmentButton.style.display = 'block';
     logoutFromWelcomeButton.style.display = 'block';
 
@@ -124,26 +115,34 @@ export const showWelcome = () => {
     setupEventListeners();
 }
 
-export const requestAccess = () => {
-    const user = JSON.parse(localStorage.getItem('user'));
-    const userEmail = user ? user.email : null;
 
-    if (userEmail) {
-        const emailSubject = 'Access Level Change Request';
-        const emailBody = `Hello Admin,     
-    
+export const requestAccess = async () => {
+    const token = localStorage.getItem("token");
 
-    I would like to request an access level change to staff.
-
-    Thank you,
-    ${userEmail}`;
-
-        sendEmail('katherineapuzzo@gmail.com', emailSubject, emailBody)
-            .then(response => {
-                console.log('Email sent successfully:', response);
-            })
-            .catch(error => {
-                console.error('Error sending email:', error);
-            });
+    if (!token) {
+        console.error("No token found.");
+        alert("You must be logged in to request access.");
+        return;
     }
-}
+
+    try {
+        const response = await fetch("/api/v1/request-access", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`, // Send token to backend
+            },
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+            console.log("Request access email sent successfully:", data);
+            alert("Request sent! An admin will review your request.");
+        } else {
+            console.error("Failed to send request:", data);
+            alert("Error sending request. Try again later.");
+        }
+    } catch (error) {
+        console.error("Error:", error);
+    }
+};

@@ -10,16 +10,19 @@ const register = async (req, res) => {
      
     try{
         const user = await User.create({ ...req.body });
-
-    const token = jwt.sign(
-        { id: user._id, name: user.name, role: user.role },
-        process.env.JWT_SECRET,
-        { expiresIn: "1d" }
-    );
+        const token = jwt.sign(
+            { 
+                id: user._id, 
+                name: user.name,
+                email: user.email,
+                role: user.role 
+            },
+            process.env.JWT_SECRET,
+            { expiresIn: "1d" }
+        );
         res.status(StatusCodes.CREATED).json({ 
             user: { id: user._id, name: user.name, role: user.role }, 
             token, 
-            role: user.role 
         });
     } catch (error) {
         if (error.code && error.code === 11000) {

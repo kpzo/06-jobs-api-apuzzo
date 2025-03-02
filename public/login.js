@@ -116,7 +116,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   logonCancel.style.display = "block";
   logonButton.style.display = "block";
   registerNowButton.style.display = "block";
-  goBackButton.style.display = "block";
 
   if(!localStorage.getItem('token')) {
     setDiv(loginRegisterDiv);
@@ -129,12 +128,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       localStorage.setItem("user", JSON.stringify(user));  // ✅ Resave user info
     }
   });
-
-  // Add event listener for goBackButton to return to the previous view
-  goBackButton.addEventListener("click", (e) => {
-    e.preventDefault();
-    window.history.back();
-});
 
 registerButton.addEventListener("click", (e) => {
   e.preventDefault();
