@@ -1,11 +1,13 @@
 
 import { enableInput, inputEnabled, setDiv } from "./index.js";
 import { showLogin  } from "./login.js";
+import { showWelcome  } from "./welcome.js";
 import { showRegister  } from "./register.js";
 
 
 document.addEventListener("DOMContentLoaded", () => {
   const loginRegisterDiv = document.getElementById("logon-register-div");
+  const welcomeDiv = document.getElementById("welcome-div");
   const loginDiv = document.getElementById("logon-div");
   const registerDiv = document.getElementById("register-div");
   const equipmentDiv = document.getElementById("equipment-div");
@@ -20,9 +22,18 @@ document.addEventListener("DOMContentLoaded", () => {
   const roleInput = document.getElementById("role");
   roleInput.value = userRole;
 
+  const storedToken = localStorage.getItem("token");
+
+  if (storedToken) {
+    setDiv(welcomeDiv);
+    loginRegisterDiv.style.display = "none";
+    return;
+  } else {
   setDiv(loginRegisterDiv);
   enableInput(true)
+  }
 
+  welcomeDiv.style.display = "none";
   loginDiv.style.display = "none";
   registerDiv.style.display = "none";
   equipmentDiv.style.display = "none";
@@ -31,7 +42,6 @@ document.addEventListener("DOMContentLoaded", () => {
   logonButton.style.display = "block";
   registerButton.style.display = "block";
   viewEquipmentAfterLoginButton.style.display = "none";
-  viewAllEquipmentButton.style.display = "none";
 
   handleLoginRegister();
 
@@ -44,7 +54,6 @@ export const handleLoginRegister = () => {
 
   enableInput(true);
   setDiv(loginRegisterDiv);
-  showLoginRegister();
 
   logonButton.style.display = "block";
   registerButton.style.display = "block";
@@ -71,6 +80,12 @@ export const showLoginRegister = () => {
   const logonDiv = document.getElementById("logon-div");
   const equipmentDiv = document.getElementById("equipment-div");
   const registerDiv = document.getElementById("register-div");
+
+  const storedToken = localStorage.getItem("token");
+
+  if (storedToken) {
+    return;
+  }
 
   setDiv(loginRegisterDiv);
   logonDiv.style.display = "none";

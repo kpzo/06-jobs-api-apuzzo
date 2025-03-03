@@ -1,7 +1,7 @@
 
 import { enableInput, inputEnabled, message, setDiv, token } from "./index.js";
 import { fetchAndDisplayEquipment, addEquipment, fetchEquipmentById, deleteEquipment, showEquipment } from "./equipment.js";
-import { showWelcome } from "./welcome.js";
+
 
 const API_URL = "http://localhost:5000/api/v1";
 
@@ -14,11 +14,11 @@ const submitAddButton = document.getElementById("submit-add-button");
 const equipmentDiv = document.getElementById("equipment-div");
 const editEquipmentDiv = document.getElementById("edit-equipment-div");
 const equipmentMessage = document.getElementById("equipment-message");
-const userRole = JSON.parse(localStorage.getItem("user")).role;
+const user = JSON.parse(localStorage.getItem("user"));
+const userRole = user ? user.role : null;
 const viewAllEquipmentButton = document.getElementById("view-all-equipment-button");
 const submitUpdateButton = document.getElementById("submit-update-button");
 const deleteEquipmentButton = document.getElementById("delete-equipment-button");
-const editCancelButton = document.getElementById("edit-cancel-button");
 const backToEquipmentButton = document.getElementById("back-to-equipment-button");
 
   window.addEventListener("beforeunload", () => {
@@ -26,11 +26,6 @@ const backToEquipmentButton = document.getElementById("back-to-equipment-button"
     if (user) {
       localStorage.setItem("user", JSON.stringify(user));  // ✅ Resave user info
     }
-  });
-
-  editCancelButton.addEventListener("click", (e) => {
-    e.preventDefault();
-    setDiv(equipmentDiv);
   });
 
   deleteEquipmentButton.addEventListener("click", async (e) => {
@@ -53,15 +48,6 @@ const backToEquipmentButton = document.getElementById("back-to-equipment-button"
     }
   });
 
-  viewAllEquipmentButton.addEventListener("click", (e) => {
-    e.preventDefault();
-    showEquipment();
-  });
-
-  welcomeAddEquipmentButton.addEventListener("click", async (e) => {
-    e.preventDefault();
-    showAddEquipmentForm();
-  });
 
   submitAddButton.addEventListener("click", async (e) => {
     e.preventDefault();
@@ -74,20 +60,25 @@ const backToEquipmentButton = document.getElementById("back-to-equipment-button"
     const serialNumber = document.getElementById("add-serial-number").value;
     const updatedBy = document.getElementById("add-updated-by").value;
     const status = document.getElementById("add-status").value;
+    const addEquipmentMessage = document.getElementById("add-equipment-message");
 
     const fields = brand && mount && focalLength && aperture && version && serialNumber && updatedBy && status;
     if (fields) {
       await addEquipment();
+      addEquipmentMessage.textContent = "Equipment added successfully.";
       fetchAndDisplayEquipment();
     } else {
-      message.textContent = "Please fill in all required fields.";
+      addEquipmentMessage.textContent = "Please fill in all required fields.";
     }
   });
   
   backToEquipmentButton.addEventListener("click", (e) => {
     e.preventDefault();
     console.log('back to equipment button clicked')
-    showEquipment();
+    setDiv(equipmentDiv);
+    editEquipmentDiv.style.display = "none";
+    welcomeDiv.style.display = "none";
+    fetchAndDisplayEquipment();
   });
 
   addEquipmentDiv.addEventListener("click", async (e) => {
@@ -123,10 +114,15 @@ const backToEquipmentButton = document.getElementById("back-to-equipment-button"
           
           console.log('equipmentItem loaded for editing:', equipmentItem)
           showEditForm(equipmentItem);
+          setDiv(editEquipmentDiv);
+          equipmentDiv.style.display = "none";
+          welcomeDiv.style.display = "none";
+          addEquipmentDiv.style.display = "none";
         } catch (error) {
           message.textContent = "Error fetching equipment. Please try again.";
         }
       }
+    
   
     // DELETE BUTTON LOGIC
     if (e.target.id === "delete-button") {
@@ -171,7 +167,6 @@ export const showAddEquipmentForm = () => {
   addEquipmentForm.style.display = "block";
 
   addEquipmentForm.reset();
-  message.textContent = "";
 };
 
 
@@ -261,6 +256,7 @@ export async function showEditForm(equipmentData) {
 export const updateEquipment = async (equipmentId) => {
   enableInput(true);
 
+  const editEquipmentMessage = document.getElementById("edit-equipment-message");
   const equipmentData = document.getElementById("edit-form").dataset.equipmentId;
   console.log('equipmentData', equipmentData)
 
@@ -274,7 +270,7 @@ export const updateEquipment = async (equipmentId) => {
   const remarks = document.getElementById("edit-remarks").value;
 
   if (!updatedBy || !status) {
-    message.textContent = "Please fill in all required fields.";
+    editEquipmentMessage.textContent = "Please fill in all required fields.";
     return;
   }
 

@@ -2,6 +2,8 @@ const express = require("express");
 const router = express.Router();
 const nodemailer = require("nodemailer");
 const jwt = require("jsonwebtoken");
+const LocalStorage = require("node-localstorage").LocalStorage;
+const localStorage = new LocalStorage("./scratch");
 require("dotenv").config(); // Ensure environment variables are loaded
 
 // POST /request-access
@@ -31,9 +33,12 @@ router.post("/", async (req, res) => {
         const transporter = nodemailer.createTransport({
             service: "gmail",
             auth: {
+                type: "OAuth2",
                 user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASS,
-            },
+                clientId: process.env.CLIENT_ID,
+                clientSecret: process.env.CLIENT_SECRET,
+                redirectURI: process.env.REDIRECT_URI,
+            }
         });
 
         // Email Content
@@ -67,4 +72,4 @@ ${userName}
     }
 });
 
-module.exports = router;
+module.exports = router, localStorage;

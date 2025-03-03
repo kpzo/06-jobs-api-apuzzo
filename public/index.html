@@ -101,15 +101,15 @@
         <th colspan="2">Actions</th>
       </tr>
     </table>
-    <button type="button" id="logoff-from-equipment-button">Log Out</button>
     <button type="button" id="add-equipment-button">Add Equipment</button>
-    <button type="button" id="view-all-equipment-button">View All Equipment</button>
     <button type="button" id="back-to-welcome">Return to Welcome Page</button>
+    <button type="button" id="logoff-from-equipment-button">Log Out</button>
   </div>
 
 <!-- Equipment Edit Form -->
  <div id="edit-equipment-div" style="display: none;">
-  <h2>Edit Equipment</h2>
+  <h2>Update Equipment</h2>
+  <p id="edit-equipment-message"></p>
   <form id="edit-form">
     <!-- Non-editable fields as static text -->
     <p><strong>Brand:</strong> <span id="edit-brand-text"></span></p>
@@ -139,7 +139,6 @@
     <button type="button" id="back-to-equipment-button">Go Back to All Equipment</button>
     <button type="submit" id="submit-update-button">Update</button>
     <button type="button" id="delete-equipment-button">Delete</button>
-    <button type="button" id="edit-cancel-button">Cancel</button>
   </form>
 </div>
 
@@ -147,6 +146,7 @@
 <!-- Add Equipment Form -->
 <div id="add-equipment-div" style="display: none;">
   <h2>Add Equipment</h2>
+  <p id="add-equipment-message"></p>
   <form id="add-equipment-form">
     <label for="add-brand">Brand:</label>
     <input type="text" id="add-brand" />

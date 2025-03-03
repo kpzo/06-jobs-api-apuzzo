@@ -3,101 +3,76 @@ import { showWelcome } from "./welcome.js";
 
 let activeDiv = null;
 export const setDiv = (newDiv) => {
-  if (newDiv != activeDiv) {
-    if (activeDiv) {
-      activeDiv.style.display = "none";
+    if (!newDiv) {
+        console.error("setDiv() called with no div.");
+        return;
     }
-    newDiv.style.display = "block";
-    activeDiv = newDiv;
-  }
-};
 
-export let inputEnabled = true;
+    document.querySelectorAll(".page").forEach((div) => {
+        div.style.display = "none";
+    });
 
-export const enableInput = (state) => {
-  inputEnabled = state;
-};
-
-export let token = null;
-export const setToken = (value) => {
-  token = value;
-  if (value) {
-    localStorage.setItem("token", value);
-    try {
-      const decodedPayload = JSON.parse(atob(value.split(".")[1]));
-      console.log("Decoded JWT Payload:", decodedPayload);
-    
-      const userRole = decodedPayload.role || 'user';
-      localStorage.setItem("role", userRole);
-    } catch (error) {
-      console.error("Error decoding token:", error);
+    if (newDiv !== activeDiv) {
+        newDiv.style.display = "block";
+        activeDiv = newDiv;
     }
-  } else {
-    localStorage.removeItem("token");
-    localStorage.removeItem("role");
-  }
-};
-
-export const formatDate = (dateString) => {
-  const options = { year: "numeric", month: "2-digit", day: "2-digit", timeZone: "UTC" };
-  return new Intl.DateTimeFormat("en-US", options).format(new Date(dateString));
-};
-
-export const handleLogoff = () => {
-  if (confirm("Are you sure you want to log off?")) {
-    setToken(null);
-    if (message) message.textContent = "You have been logged off.";
-    console.log("User logged off.");
-    if (!token) {
-      showLoginRegister();
-    }
-  }
 };
 
 export let message = null;
-export let role = null;
 
-document.addEventListener("DOMContentLoaded", (e) => {
-  e.preventDefault();
+export let inputEnabled = true;
+export const enableInput = (state) => { inputEnabled = state; };
 
-  const storedToken = localStorage.getItem("token");
-  const storedUser = JSON.parse(localStorage.getItem("user"));
-
-  message = document.getElementById("message");
-
-  if (storedToken && storedUser) {
-    console.log('user found, auto login');
-    setToken(storedToken);
-    showWelcome();
-  } else {
-    console.log('no user found, show login/register');
-    setDiv(document.getElementById("logon-register-div"));
-    showLoginRegister();
-  }
-
-  window.addEventListener("beforeunload", () => {
-    const user = JSON.parse(localStorage.getItem("user"));
-    if (user) {
-      localStorage.setItem("user", JSON.stringify(user));  // ✅ Resave user info
+export let token = null;
+export const setToken = (value) => {
+    token = value;
+    if (value) {
+        localStorage.setItem("token", value);
+        try {
+            const decodedPayload = decodeJWT(value);
+            localStorage.setItem("email", decodedPayload?.email || null);
+            localStorage.setItem("role", decodedPayload?.role || 'user');
+            console.log("Decoded JWT Payload:", decodedPayload);
+        } catch (error) {
+            console.error("Error decoding token:", error);
+        }
+    } else {
+        localStorage.removeItem("token");
+        localStorage.removeItem("role");
     }
-  });
-});
+};
 
+export const decodeJWT = (token) => {
+    try {
+        const base64Url = token.split(".")[1];
+        const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+        return JSON.parse(atob(base64));
+    } catch (error) {
+        console.error("Error decoding token:", error);
+        return {};
+    }
+};
+
+export const handleLogoff = () => {
+    if (confirm("Are you sure you want to log off?")) {
+        localStorage.clear();
+        setToken(null);
+        console.log("User logged off.");
+        setDiv(document.getElementById("logon-register-div"));
+        showLoginRegister();
+    }
+};
+
+// Ensure session persistence on reload
 document.addEventListener("DOMContentLoaded", () => {
-  console.log("✅ DOM fully loaded, checking for elements...");
-
-  [
-    "edit-brand-text", 
-    "edit-mount-text", 
-    "edit-focal-length-text",
-    "edit-aperture-text",
-    "edit-version-text",
-    "edit-serial-number-text",
-    "edit-updated-by",
-    "edit-status",
-    "edit-remarks"
-  ].forEach(id => {
-    const element = document.getElementById(id);
-    console.log(`❓ ${id} exists?`, element ? "✅ YES" : "❌ NO");
-  });
+    const storedToken = localStorage.getItem("token");
+    if (storedToken) {
+        console.log('User found, auto login');
+        setToken(storedToken);
+        showWelcome();
+    } else {
+        console.log('No user found, show login/register');
+        setDiv(document.getElementById("logon-register-div"));
+        showLoginRegister();
+    }
 });

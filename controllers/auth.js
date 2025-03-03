@@ -21,7 +21,7 @@ const register = async (req, res) => {
             { expiresIn: "1d" }
         );
         res.status(StatusCodes.CREATED).json({ 
-            user: { id: user._id, name: user.name, role: user.role }, 
+            user: { id: user._id, name: user.name, email: user.email, role: user.role }, 
             token, 
         });
     } catch (error) {

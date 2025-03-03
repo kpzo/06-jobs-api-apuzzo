@@ -25,7 +25,9 @@ document.addEventListener("DOMContentLoaded", () => {
   password2 = document.getElementById("password2");
   roleInput = document.getElementById("registrationRole");
 
-  handleRegister();
+  setTimeout(() => {
+    handleRegister();
+  }, 1000);
 
   window.addEventListener("beforeunload", () => {
     const user = JSON.parse(localStorage.getItem("user"));
@@ -121,13 +123,10 @@ export const showRegister = () => {
 
 
 export const handleRegister = () => {
-  registerDiv = document.getElementById("register-div");
   const registerCancel = document.getElementById("register-cancel");
-    const registerButton = document.getElementById("register-button");
-    const registerNowButton = document.getElementById("register-now-button");
+  const registerButton = document.getElementById("register-button");
+  const registerNowButton = document.getElementById("register-now-button");
 
-    enableInput(true);
-    setDiv(registerDiv);
     registerNowButton.style.display = "block";
 
     registerButton.addEventListener("click", (e) => {

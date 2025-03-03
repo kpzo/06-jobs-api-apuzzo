@@ -6,10 +6,13 @@ import { setupEventListeners } from "./equipment.js";
 import { showLoginRegister } from "./loginRegister.js";
 
 
+
 document.addEventListener('DOMContentLoaded', function() {
+
     const welcomeDiv = document.getElementById('welcome-div');
     const equipmentDiv = document.getElementById('equipment-div');
     const addEquipmentDiv = document.getElementById('add-equipment-div');
+    const loginRegisterDiv = document.getElementById('logon-register-div');
 
     const welcomeViewEquipmentButton = document.getElementById('view-equipment-after-login-button');
     const welcomeAddEquipmentButton = document.getElementById('add-equipment-after-login-button');
@@ -17,8 +20,16 @@ document.addEventListener('DOMContentLoaded', function() {
     const requestAccessButton = document.getElementById('request-access-button');
 
     const user = JSON.parse(localStorage.getItem('user'));
+    const storedToken = localStorage.getItem('token');
+
+    if(!storedToken) {
+        console.log('no user found, show login/register');
+        setDiv(loginRegisterDiv);
+        return;
+    }
+
     const userRole = user ? user.role : null;
-    
+
     welcomeViewEquipmentButton.style.display = 'none';
     welcomeAddEquipmentButton.style.display = 'none';
     logoutFromWelcomeButton.style.display = 'none';
@@ -29,7 +40,7 @@ document.addEventListener('DOMContentLoaded', function() {
     window.addEventListener("beforeunload", () => {
         const user = JSON.parse(localStorage.getItem("user"));
         if (user) {
-          localStorage.setItem("user", JSON.stringify(user));  // ✅ Resave user info
+          localStorage.setItem("user", JSON.stringify(user));  // Resave user info
         }
       });
 
@@ -45,7 +56,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (welcomeViewEquipmentButton) {
         welcomeViewEquipmentButton.addEventListener('click', (e) => {
+            const editEquipmentForm = document.getElementById('edit-equipment-form');
             e.preventDefault();
+
+            if (editEquipmentForm !== null) {
+                            return;
+                        }
+            
             if (token) {
                 setDiv(equipmentDiv);
                 fetchAndDisplayEquipment();
@@ -61,6 +78,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (token) {
                 setDiv(addEquipmentDiv);
                 showAddEquipmentForm();
+                welcomeDiv.style.display = 'none';
             } else {
                 showLoginRegister();
             }
@@ -84,11 +102,13 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
             requestAccess();
         });
-    }
-    
+    } else { 
     setDiv(welcomeDiv);
     setupEventListeners();
-  })
+  }
+});
+
+
 
 export const showWelcome = () => {
     const welcomeDiv = document.getElementById('welcome-div');

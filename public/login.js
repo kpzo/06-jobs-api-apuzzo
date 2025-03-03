@@ -11,49 +11,52 @@ import { showLoginRegister } from "./loginRegister.js";
 import { showRegister } from "./register.js";
 import { showWelcome } from "./welcome.js";
 
+
+
 export const handleLogin = async () => {
   console.log("Handling login...");
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
   const role = document.getElementById("role").value;
   const loginMessage = document.getElementById("message");
+
   loginMessage.textContent = "";
 
-  if (!email || !password) {
-    loginMessage.textContent = "Email and password are required.";
-    return;
+  if (!email || !password || !role) {
+      loginMessage.textContent = "Email, password, and role are required.";
+      return false;
   }
-  if( email && password && role) {
+
   try {
-    const response = await fetch("/api/v1/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
+      const response = await fetch("/api/v1/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password, role }),
+      });
 
-    const data = await response.json();
-    if (!response.ok) {
-      console.error("Login failed:", data.msg);
-      loginMessage.textContent = data.msg || "Invalid email or password";
-      return;
-    }
+      const data = await response.json();
 
-    console.log("Login Successful:", data.user.name);
-    localStorage.setItem("user", JSON.stringify(data.user));
-    localStorage.setItem("token", data.token);
-    localStorage.setItem("role", data.user.role);
-    setToken(data.token);
+      if (!response.ok) {
+          console.error("Login failed:", data.msg);
+          loginMessage.textContent = data.msg || "Invalid email or password";
+          return false;
+      }
 
-    loginMessage.textContent = `Welcome ${data.user.name}`;
-    showWelcome(data.user.role);
+      console.log("Login Successful:", data.user.name);
+      setToken(data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+
+      // Show welcome page only after token is set
+      showWelcome();
+      return true;
+
   } catch (err) {
-    console.error("Login Error:", err);
-    loginMessage.textContent = "Error logging in.";
+      console.error("Login Error:", err);
+      loginMessage.textContent = "Error logging in.";
+      return false;
   }
-} else {
-  loginMessage.textContent = "All fields are required.";
-  return;
-};}
+};
+
 
 export const showLogin = () => {
   const logonForm = document.getElementById("logon-form");
@@ -103,7 +106,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   const registerNowButton = document.getElementById("register-now-button");
   const equipmentDiv = document.getElementById("equipment-div");
   const addEquipmentDiv = document.getElementById("add-equipment-div");
-  const goBackButton = document.getElementById("go-back-button");
   const user = JSON.parse(localStorage.getItem("user"));
   const userRole = user ? user.role : null;
   const roleInput = document.getElementById("role");
@@ -145,17 +147,24 @@ logonCancel.addEventListener("click", (e) => {
   });
 
   logonSubmit.addEventListener("click", async (e) => {
-    const welcomeDiv = document.getElementById("welcome-div");
     e.preventDefault();
-    enableInput(true);
-    if (email.value && password.value) {
-      await handleLogin();
+
+    const welcomeDiv = document.getElementById("welcome-div");
+    const message = document.getElementById("message");
+    const logonDiv = document.getElementById("logon-div");
+
+    enableInput(true)
+
+    const success = await handleLogin();
+
+    if (success) {
       setDiv(welcomeDiv);
-      showWelcome();
+      loginRegisterDiv.style.display = "none";
+      logonDiv.style.display = "none";
+      message.textContent = "Welcome! Login successful.";
     } else {
-      message.textContent = "Please enter both email and password.";
-      showLogin();
+      setDiv(logonDiv);
+      message.textContent = "Invalid credentials, please try again.";
     }
   });
-  
 });

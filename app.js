@@ -1,13 +1,13 @@
 // Description: Main file to start the server
-// Used by: server.js
 // Requires: dotenv, express, path, helmet, cors, xss-clean, express-rate-limit, db/connect, routes/auth, routes/equipment, middleware/not-found, middleware/error-handler
 require('dotenv').config();
 require('express-async-errors');
 const express = require('express');
 const path = require('path');
 const app = express();
+const localStorage = require('./localstorage');
 
-// secutiry middlware
+// security middleware
 const helmet = require('helmet');
 const cors = require('cors');
 const xss = require('xss-clean');
@@ -20,7 +20,7 @@ const connectDB = require('./db/connect');
 const authRouter = require('./routes/auth');
 const equipmentRouter = require('./routes/equipment');
 const requestAccessRoute = require('./routes/request-access');
-
+const localStorageRoute = require('./routes/localstorage');
 
 // set security middleware
 app.set('trust proxy', 1);
@@ -36,14 +36,13 @@ app.use(xss());
 // static assets
 app.use(express.static(path.join(__dirname, "public")));
 
-
+// set content type for js files
 app.use((req, res, next) => {
   if (req.path.endsWith(".js")) {
       res.type("application/javascript");
   }
   next();
 });
-
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
@@ -53,6 +52,7 @@ app.get("/", (req, res) => {
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/equipment', equipmentRouter);
 app.use('/api/v1/request-access', requestAccessRoute);
+app.use('/localstorage', localStorageRoute);
 
 
 // error handler

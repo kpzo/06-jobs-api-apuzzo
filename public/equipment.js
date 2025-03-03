@@ -18,6 +18,13 @@ const API_URL = "http://localhost:5000/api/v1";
 
 document.addEventListener("DOMContentLoaded", () => {
 
+  const equipmentDiv = document.getElementById("equipment-div");
+  const addEquipmentDiv = document.getElementById("add-equipment-div");
+  const welcomeDiv = document.getElementById("welcome-div");
+  const backToWelcome = document.getElementById("back-to-welcome");
+  const backToAllEquipment = document.getElementById("back-to-all-equipment");
+  const addEquipmentButton = document.getElementById("add-equipment-button");
+
   window.addEventListener("beforeunload", () => {
     const user = JSON.parse(localStorage.getItem("user"));
     if (user) {
@@ -25,52 +32,37 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  document.getElementById('back-to-welcome').addEventListener('click', (e) => {
+  backToWelcome.addEventListener('click', (e) => {
+    const equipmentDiv = document.getElementById('equipment-div');
     e.preventDefault();
+    equipmentDiv.style.display = 'none';
     showWelcome();
   });
 
-  document.getElementById('back-to-all-equipment').addEventListener('click', (e) => {  
-      e.preventDefault();
-      console.log('back to equipment button from add page clicked')
-      showEquipment();
-    });
-
-  document.getElementById("equipment-table").addEventListener("click", async (e) => {
-    if (e.target.id === "edit-button") {
-      console.log("🛠️ Edit button clicked, fetching equipment...");
-      
-      const equipmentId = e.target.dataset.id;
-      const equipmentData = await fetchEquipmentById(equipmentId);
-      
-      if (equipmentData) {
-        console.log("✅ Equipment Data Retrieved:", equipmentData);
-        showEditForm(equipmentData);
-      } else {
-        console.error("❌ Error: Could not load equipment data.");
-      }
-    }
-  });
-  
-
-  enableInput(true);
-  if (token) {
-    showWelcome();
-    showAddEquipmentForm();
+  backToAllEquipment.addEventListener('click', (e) => {  
+    e.preventDefault();
+    console.log('back to equipment button from add page clicked');
+    setDiv(equipmentDiv);
     showEquipment();
-  }
-  else {
-    showLoginRegister();
-  }
-  setupEventListeners();
+    addEquipmentDiv.style.display = 'none';
+  });
+
+  addEquipmentButton.addEventListener('click', (e) => {
+    e.preventDefault();
+    showAddEquipmentForm();
+    welcomeDiv.style.display = "none";
+  });
 });
+
+
 
 export async function showEquipment() {
   const equipmentDiv = document.getElementById("equipment-div");
-  const message = document.getElementById("equipment-message");
-  const equipmentTable = document.getElementById("equipment-table");
-  const addEquipmentDiv = document.getElementById("add-equipment-div");
   const editEquipmentDiv = document.getElementById("edit-equipment-div");
+
+  if (editEquipmentDiv.style.display === "block") {
+    return;
+  }
 
   try {
     const response = await fetch(`${API_URL}/equipment`, {
@@ -85,25 +77,16 @@ export async function showEquipment() {
     }
 
     console.log('Equipment data received:', equipment);
-
-    if (equipment.length === 0) {
-      console.warn("⚠️ No equipment found.");
-      if (message) message.textContent = "No equipment available.";
-      return;
-    }
-
-    updateEquipmentTable(equipment); // Update the table with the fetched equipment
+    updateEquipmentTable(equipment);
 
   } catch (error) {
-    console.error("❌ Error fetching equipment:", error);
+    console.error("Error fetching equipment:", error);
     if (message) message.textContent = "Error loading equipment.";
   }
   
-  // Hide add & edit forms, show equipment list
-  addEquipmentDiv.style.display = "none";
+  // Hide edit forms, show equipment list
   editEquipmentDiv.style.display = "none";
   equipmentDiv.style.display = "block";
-  equipmentTable.style.display = "block";
 }
 
 
@@ -115,21 +98,13 @@ export function setupEventListeners() {
   if (eventListenerSet) return;
   eventListenerSet = true;
   
-  document.getElementById("view-all-equipment-button").addEventListener("click", (e) => {
-    e.preventDefault();
-    fetchAndDisplayEquipment();
-  });
 
   document.getElementById("logoff-from-equipment-button").addEventListener("click", () => {
     showLoginRegister();
     handleLogoff();
   });
   
-  document.getElementById('add-equipment-button').addEventListener('click', showAddEquipmentForm);
-  
 }
-
-
 
 
 export async function addEquipment(equipmentId) {
@@ -199,24 +174,41 @@ export async function addEquipment(equipmentId) {
 
 
 export async function fetchAndDisplayEquipment() {
+
+  const equipmentDiv = document.getElementById("equipment-div");
+  const welcomeDiv = document.getElementById("welcome-div");
+  const equipmentMessage = document.getElementById("equipment-message");
+  const editEquipmentDiv = document.getElementById("edit-equipment-div");
+
+
+  welcomeDiv.style.display = "none";
+  equipmentDiv.style.display = "block";
+
   try {
     const response = await fetch(`${API_URL}/equipment`, {
       headers: { Authorization: `Bearer ${token}` },
     });
 
-    if (!response.ok) throw new Error("Failed to fetch equipment");
+    if (!response.ok) {
+      console.error("API request failed, status:", response.status);
+      return;
+    }
 
-    let { equipment } = await response.json();
+
+    const { equipment } = await response.json();
     if (!Array.isArray(equipment)) {
       equipment = [equipment];
     }
     console.log('equipment data:', equipment)
 
-    updateEquipmentTable(Array.isArray(equipment) ? equipment : [equipment]);
+    updateEquipmentTable(equipment);
+
+    editEquipmentDiv.style.display = "none";
+    equipmentDiv.style.display = "block";
 
   } catch (error) {
     console.error("Error fetching equipment:", error);
-    message.textContent = "Error loading equipment.";
+    equipmentMessage.textContent = "Error loading equipment.";
   }
 }
 
@@ -228,6 +220,7 @@ export function updateEquipmentTable(equipment) {
   const message = document.getElementById("message");
   const welcomeAddEquipmentButton = document.getElementById("add-equipment-button");
   const backToWelcomeButton = document.getElementById("back-to-welcome");
+
 
   if (backToWelcomeButton) {
     backToWelcomeButton.style.display = "block";
@@ -300,8 +293,16 @@ export function updateEquipmentTable(equipment) {
 
     if (userRole !== 'user') {
     row.querySelector(".edit-button").addEventListener("click", async (e) => {
+      const welcomeDiv = document.getElementById("welcome-div");
+      const editEquipmentDiv = document.getElementById("edit-equipment-div");
+      const equipmentDiv = document.getElementById("equipment-div");
       const equipmentId = e.target.dataset.id;
-      console.log("✅ Edit Button Clicked - Equipment ID:", equipmentId);
+
+      console.log("Edit Button Clicked - Equipment ID:", equipmentId);
+
+      welcomeDiv.style.display = "none";
+      editEquipmentDiv.style.display = "block";
+      equipmentDiv.style.display = "none";
 
       const equipmentData = await fetchEquipmentById(equipmentId);
 
@@ -317,6 +318,7 @@ export function updateEquipmentTable(equipment) {
     row.querySelector(".delete-button").addEventListener("click", async (e) => {
       const equipmentId = e.target.dataset.id;
       console.log('delete equipment id:', equipmentId)
+      alert("Are you sure you want to delete this equipment?");
       await deleteEquipment(equipmentId);
       await fetchAndDisplayEquipment();
     })

@@ -45,7 +45,7 @@ UserSchema.pre('save', async function(){
 
 // once again use 'function' to refer to our document for specific user data
 UserSchema.methods.createJWT = function() {
-    return jwt.sign({ userId: this._id, name: this.name, role: this.role  }, 
+    return jwt.sign({ userId: this._id, name: this.name, email: this.email, role: this.role  }, 
         process.env.JWT_SECRET, 
         { expiresIn: process.env.JWT_LIFETIME })
 }
