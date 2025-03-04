@@ -1,8 +1,7 @@
 
 import { setDiv, handleLogoff, token } from "./index.js";
-import { fetchAndDisplayEquipment } from "./equipment.js";
+import { fetchAndDisplayEquipment, setupEventListeners } from "./equipment.js";
 import { showAddEquipmentForm } from "./addEdit.js";
-import { setupEventListeners } from "./equipment.js";
 import { showLoginRegister } from "./loginRegister.js";
 
 
@@ -54,58 +53,37 @@ document.addEventListener('DOMContentLoaded', function() {
         logoutFromWelcomeButton.style.display = 'block';
     }
 
-    if (welcomeViewEquipmentButton) {
-        welcomeViewEquipmentButton.addEventListener('click', (e) => {
-            const editEquipmentForm = document.getElementById('edit-equipment-form');
-            e.preventDefault();
+    welcomeViewEquipmentButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (token) {
+            setDiv(equipmentDiv);
+            fetchAndDisplayEquipment();
+        }
+    });
 
-            if (editEquipmentForm !== null) {
-                            return;
-                        }
-            
-            if (token) {
-                setDiv(equipmentDiv);
-                fetchAndDisplayEquipment();
-            } else {
-                showLoginRegister();
-            }
-        });
-    }
+    welcomeAddEquipmentButton.addEventListener('click', (e) => {
+       e.preventDefault();
+        if (token) {
+            setDiv(addEquipmentDiv);
+            showAddEquipmentForm();
+            welcomeDiv.style.display = 'none';
+        } else {
+            showLoginRegister();
+        }
+    });
 
-    if (welcomeAddEquipmentButton) {
-        welcomeAddEquipmentButton.addEventListener('click', (e) => {
-            e.preventDefault();
-            if (token) {
-                setDiv(addEquipmentDiv);
-                showAddEquipmentForm();
-                welcomeDiv.style.display = 'none';
-            } else {
-                showLoginRegister();
-            }
-            
-        });
-    }
-    
-    if (logoutFromWelcomeButton) {
         logoutFromWelcomeButton.addEventListener('click', (e) => {
             e.preventDefault();
-            const loginRegisterDiv = document.getElementById('logon-register-div');
-
             handleLogoff();
-            setDiv(loginRegisterDiv);
-            showLoginRegister();
-        });
-    }
+      });
 
-    if (requestAccessButton) {
-        requestAccessButton.addEventListener('click', (e) => {
-            e.preventDefault();
-            requestAccess();
-        });
-    } else { 
+
+    requestAccessButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        requestAccess();
+    }); 
     setDiv(welcomeDiv);
     setupEventListeners();
-  }
 });
 
 
@@ -132,6 +110,15 @@ export const showWelcome = () => {
     logoutFromWelcomeButton.style.display = 'block';
 
     setDiv(welcomeDiv);
+    
+    
+    // remove any exisiting event listeners
+    welcomeViewEquipmentButton.replaceWith(welcomeViewEquipmentButton.cloneNode(true));
+    welcomeAddEquipmentButton.replaceWith(welcomeAddEquipmentButton.cloneNode(true));
+    logoutFromWelcomeButton.replaceWith(logoutFromWelcomeButton.cloneNode(true));
+    requestAccessButton.replaceWith(requestAccessButton.cloneNode(true));
+
+    // Reattach event listeners
     setupEventListeners();
 }
 

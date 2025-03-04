@@ -30,17 +30,25 @@ export const setToken = (value) => {
         localStorage.setItem("token", value);
         try {
             const decodedPayload = decodeJWT(value);
-            localStorage.setItem("email", decodedPayload?.email || null);
-            localStorage.setItem("role", decodedPayload?.role || 'user');
+            localStorage.setItem("user", JSON.stringify({
+                _id: decodedPayload?.userId || decodedPayload?._id || null,
+                name: decodedPayload?.name || null,
+                email: decodedPayload?.email || null,
+                role: decodedPayload?.role || 'user',
+            }));
+            
             console.log("Decoded JWT Payload:", decodedPayload);
         } catch (error) {
             console.error("Error decoding token:", error);
         }
     } else {
         localStorage.removeItem("token");
-        localStorage.removeItem("role");
+        localStorage.removeItem("user");
     }
 };
+
+console.log("Received Token:", localStorage.getItem("token"));
+
 
 export const decodeJWT = (token) => {
     try {
@@ -54,12 +62,16 @@ export const decodeJWT = (token) => {
 };
 
 export const handleLogoff = () => {
+    const welcomeDiv = document.getElementById("welcome-div");
+    
     if (confirm("Are you sure you want to log off?")) {
         localStorage.clear();
         setToken(null);
         console.log("User logged off.");
         setDiv(document.getElementById("logon-register-div"));
         showLoginRegister();
+        welcomeDiv.style.display = "none";
+        location.reload();
     }
 };
 

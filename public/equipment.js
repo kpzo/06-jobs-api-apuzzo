@@ -9,7 +9,6 @@ import {
   handleLogoff,
 } from "./index.js";
 
-import { showLoginRegister } from "./loginRegister.js";
 import { showWelcome } from "./welcome.js";
 import { showAddEquipmentForm, showEditForm } from "./addEdit.js";
 
@@ -20,10 +19,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const equipmentDiv = document.getElementById("equipment-div");
   const addEquipmentDiv = document.getElementById("add-equipment-div");
-  const welcomeDiv = document.getElementById("welcome-div");
   const backToWelcome = document.getElementById("back-to-welcome");
   const backToAllEquipment = document.getElementById("back-to-all-equipment");
-  const addEquipmentButton = document.getElementById("add-equipment-button");
+  const viewEquipmentButton = document.getElementById("view-equipment-after-login-button");
 
   window.addEventListener("beforeunload", () => {
     const user = JSON.parse(localStorage.getItem("user"));
@@ -39,132 +37,132 @@ document.addEventListener("DOMContentLoaded", () => {
     showWelcome();
   });
 
-  backToAllEquipment.addEventListener('click', (e) => {  
-    e.preventDefault();
-    console.log('back to equipment button from add page clicked');
-    setDiv(equipmentDiv);
-    showEquipment();
-    addEquipmentDiv.style.display = 'none';
-  });
 
-  addEquipmentButton.addEventListener('click', (e) => {
-    e.preventDefault();
-    showAddEquipmentForm();
-    welcomeDiv.style.display = "none";
-  });
+    if (viewEquipmentButton) {
+      viewEquipmentButton.removeEventListener("click", showEquipment);
+      viewEquipmentButton.addEventListener("click", showEquipment);
+  }
+
+  if (backToAllEquipment) {
+      backToAllEquipment.removeEventListener("click", showEquipment);
+      backToAllEquipment.addEventListener("click", showEquipment);
+  }
+
+  setupEventListeners();
 });
 
 
 
 export async function showEquipment() {
+  console.log("🔄 Loading equipment list...");
+
   const equipmentDiv = document.getElementById("equipment-div");
+  const addEquipmentDiv = document.getElementById("add-equipment-div");
   const editEquipmentDiv = document.getElementById("edit-equipment-div");
+  const welcomeDiv = document.getElementById("welcome-div");
 
-  if (editEquipmentDiv.style.display === "block") {
-    return;
-  }
-
-  try {
-    const response = await fetch(`${API_URL}/equipment`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    if (!response.ok) throw new Error("Failed to fetch equipment");
-
-    let { equipment } = await response.json();
-    if (!Array.isArray(equipment)) {
-      equipment = [equipment];  // Ensure it's always an array
-    }
-
-    console.log('Equipment data received:', equipment);
-    updateEquipmentTable(equipment);
-
-  } catch (error) {
-    console.error("Error fetching equipment:", error);
-    if (message) message.textContent = "Error loading equipment.";
-  }
-  
-  // Hide edit forms, show equipment list
+  // Hide all other views
+  welcomeDiv.style.display = "none";
+  addEquipmentDiv.style.display = "none";
   editEquipmentDiv.style.display = "none";
+
+  // Show the Equipment List
   equipmentDiv.style.display = "block";
+
+  // Fetch and display the latest equipment list
+  await fetchAndDisplayEquipment();
 }
 
 
 
 
-let eventListenerSet = false;
 
 export function setupEventListeners() {
-  if (eventListenerSet) return;
-  eventListenerSet = true;
-  
+  console.log("Setting up event listeners...");
 
-  document.getElementById("logoff-from-equipment-button").addEventListener("click", () => {
-    showLoginRegister();
-    handleLogoff();
+  const welcomeViewEquipmentButton = document.getElementById('view-equipment-after-login-button');
+  const welcomeAddEquipmentButton = document.getElementById('add-equipment-after-login-button');
+  const logoutFromWelcomeButton = document.getElementById('logoff-button');
+  const requestAccessButton = document.getElementById('request-access-button');
+
+  if (!welcomeViewEquipmentButton || !welcomeAddEquipmentButton || !logoutFromWelcomeButton || !requestAccessButton) {
+      console.error("One or more welcome buttons not found!");
+      return;
+  }
+
+  welcomeViewEquipmentButton.addEventListener('click', (e) => {
+      e.preventDefault();
+      console.log("View Equipment button clicked");
+      setDiv(document.getElementById('equipment-div'));
+      fetchAndDisplayEquipment();
   });
-  
+
+  welcomeAddEquipmentButton.addEventListener('click', (e) => {
+      e.preventDefault();
+      console.log("Add Equipment button clicked");
+      setDiv(document.getElementById('add-equipment-div'));
+      showAddEquipmentForm();
+      document.getElementById('welcome-div').style.display = 'none';
+  });
+
+  logoutFromWelcomeButton.addEventListener('click', (e) => {
+      e.preventDefault();
+      console.log("Logout button clicked");
+      handleLogoff();
+  });
+
+  requestAccessButton.addEventListener('click', (e) => {
+      e.preventDefault();
+      console.log("Request Access button clicked");
+      requestAccess();
+  });
 }
 
 
-export async function addEquipment(equipmentId) {
-  const brand = document.getElementById("add-brand").value;
-  const mount = document.getElementById("add-mount").value;
-  const focalLength = document.getElementById("add-focal-length").value;
-  const aperture = document.getElementById("add-aperture").value;
-  const version = document.getElementById("add-version").value;
-  const serialNumber = document.getElementById("add-serial-number").value;
-  const updatedBy = document.getElementById("add-updated-by").value;
-  const status = document.getElementById("add-status").value;
+
+export async function addEquipment(fields) {
+  const message = document.getElementById("equipment-message");
 
   console.log("Adding equipment...");
-  console.log("Stored token:", localStorage.getItem("token"));
 
   const authToken = localStorage.getItem("token");
-  console.log('token being sent:', authToken)
+  const user = JSON.parse(localStorage.getItem("user"));
+  const createdBy = user ? user._id : null;
+  console.log("User ID:", createdBy);  
+  console.log("Token being sent:", authToken);
 
-  const fields = brand && mount && focalLength && aperture && version && serialNumber && updatedBy && status;
-
-  if (!fields) {
-    message.textContent = "All fields are required.";
+  if (!authToken || !createdBy) {
+    console.error("No token or user ID found.");
+    message.textContent = "You need to log in to add equipment.";
     return;
-  } 
+  }
+
+  // Create an object from the form inputs
+  const equipmentData = { ...fields, createdBy };
+
   try {
     const response = await fetch(`${API_URL}/equipment`, {
       method: "POST",
       headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${authToken}`,
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${authToken}`,
       },
-      body: JSON.stringify({
-      brand,
-      mount,
-      focalLength,
-      aperture,
-      version,
-      serialNumber,
-      updatedBy,
-      status,
-      }),
+      body: JSON.stringify(equipmentData),
     });
 
-    console.log('request headers:', response.headers)
-    console.log('request status:', response.status)
-
-    const data = await response.json();
-    console.log('api response after adding equipment', data)
-
-    if (!Array.isArray(data.equipment)) {
-      console.error('addEquipment: data.equipment is not an array', data.equipment);
-    } else {
-      console.log('addEquipment: data.equipment is an array', data.equipment);}
-
-    updateEquipmentTable(Array.isArray(data.equipment) ? data.equipment : [data.equipment]);
-    message.textContent = "Equipment added.";
+    const responseText = await response.text();
+    console.log("API response text:", responseText);
     
-    document.getElementById('add-equipment-form').reset(); 
-  } 
-  catch (error) {
+    if (!response.ok) {
+      console.error("API request failed, status:", response.status);
+      throw new Error(responseText);
+    }
+    
+    const data = JSON.parse(responseText);
+    console.log("Equipment added successfully", data);
+    message.textContent = "Equipment added successfully.";
+    return data;
+  } catch (error) {
     console.error("Error adding equipment:", error);
     message.textContent = "Error adding equipment.";
   }
@@ -173,104 +171,186 @@ export async function addEquipment(equipmentId) {
 
 
 
-export async function fetchAndDisplayEquipment() {
 
+export async function fetchAndDisplayEquipment() {
   const equipmentDiv = document.getElementById("equipment-div");
   const welcomeDiv = document.getElementById("welcome-div");
   const equipmentMessage = document.getElementById("equipment-message");
   const editEquipmentDiv = document.getElementById("edit-equipment-div");
 
-
   welcomeDiv.style.display = "none";
   equipmentDiv.style.display = "block";
 
-  try {
-    const response = await fetch(`${API_URL}/equipment`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    if (!response.ok) {
-      console.error("API request failed, status:", response.status);
+  const token = localStorage.getItem("token");
+  if (!token) {
+      console.error("No token found. User is not authenticated.");
+      equipmentMessage.textContent = "You need to log in to view equipment.";
       return;
-    }
+  }
 
+  try {
+      const response = await fetch(`${API_URL}/equipment`, {
+          headers: { Authorization: `Bearer ${token}` },
+      });
 
-    const { equipment } = await response.json();
-    if (!Array.isArray(equipment)) {
-      equipment = [equipment];
-    }
-    console.log('equipment data:', equipment)
+      if (!response.ok) {
+          console.error("API request failed, status:", response.status);
+          equipmentMessage.textContent = "Error loading equipment.";
+          return;
+      }
 
-    updateEquipmentTable(equipment);
+      const responseText = await response.text(); // Read response as plain text
+      console.log("Raw API Response:", responseText);
 
-    editEquipmentDiv.style.display = "none";
-    equipmentDiv.style.display = "block";
+      let jsonData;
+      try {
+          jsonData = JSON.parse(responseText);
+          console.log("Parsed JSON Response:", jsonData);
+      } catch (error) {
+          console.error("Error parsing JSON:", error);
+          equipmentMessage.textContent = "Error parsing equipment data.";
+          return;
+      }
+
+      // Ensure `equipment` exists in response
+      let equipment = jsonData.responseData || []; 
+
+      if (!equipment || equipment.length === 0) {
+          console.warn("No equipment data found in API response.");
+          equipmentMessage.textContent = "No equipment available.";
+          return;
+      }
+
+      if (!Array.isArray(equipment)) {
+          console.warn("API response is not an array, converting to array:", equipment);
+          equipment = [equipment];
+      }
+
+      console.log("Equipment data received:", equipment);
+      updateEquipmentTable(equipment);
+
+      editEquipmentDiv.style.display = "none";
+      equipmentDiv.style.display = "block";
 
   } catch (error) {
-    console.error("Error fetching equipment:", error);
-    equipmentMessage.textContent = "Error loading equipment.";
+      console.error("Error fetching equipment:", error);
+      equipmentMessage.textContent = "Error loading equipment.";
   }
 }
 
 
 
 
-export function updateEquipmentTable(equipment) {
-  const equipmentTable = document.getElementById("equipment-table");
-  const message = document.getElementById("message");
-  const welcomeAddEquipmentButton = document.getElementById("add-equipment-button");
-  const backToWelcomeButton = document.getElementById("back-to-welcome");
 
+export async function updateEquipmentTable(equipmentId) {
+  enableInput(true);
 
-  if (backToWelcomeButton) {
-    backToWelcomeButton.style.display = "block";
+  // Ensure equipmentMessage is defined
+  const equipmentMessage = document.getElementById("edit-equipment-message");
+  if (!equipmentMessage) {
+    console.error("edit-equipment-message element not found!");
+    return;
   }
-  console.log('equipment data received:', equipment);
+
+  const authToken = localStorage.getItem("token");
+  if (!authToken) {
+    console.error("No token found. User not authenticated.");
+    equipmentMessage.textContent = "Authentication required to update equipment.";
+    return;
+  }
+
+  // Ensure equipmentId exists
+  if (!equipmentId || typeof equipmentId !== 'string') {
+    console.error("Missing equipment ID for update.", equipmentId);
+    equipmentMessage.textContent = "Error: Missing equipment ID.";
+    return;
+    }
+    // Retrieve updated values from the form
+    const updatedByInput = document.getElementById("edit-updated-by").value;
+    const statusInput = document.getElementById("edit-status").value;
+    const remarksInput = document.getElementById("edit-remarks").value;
+
+    if (!updatedByInput || !statusInput) {
+    console.error("One or more form fields not found in DOM.");
+    equipmentMessage.textContent = "Error: Form fields missing.";
+    return;
+    }
+
+    // Construct the payload to send in the request
+    const updatePayload = { updatedByInput, statusInput, remarksInput };
+  console.log("📤 Sending update request with data:", updatePayload);
+
+  try {
+    const response = await fetch(`${API_URL}/equipment/${equipmentId}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${authToken}`,
+      },
+      body: JSON.stringify(updatePayload),
+    });
+
+    const responseText = await response.text(); // Read response as plain text for debugging
+    console.log("📩 Raw API Response:", responseText);
+
+    if (!response.ok) {
+      console.error("API request failed, status:", response.status);
+      equipmentMessage.textContent = `Error updating equipment: ${responseText}`;
+      return;
+    }
+
+    const data = JSON.parse(responseText);
+    console.log("Equipment updated successfully:", data);
+    equipmentMessage.textContent = "Equipment updated successfully.";
+
+    // Refresh equipment list after update
+    await fetchAndDisplayEquipment();
+    setDiv(document.getElementById("equipment-div")); // Navigate back to the equipment list
+
+  } catch (error) {
+    console.error("Error updating equipment:", error);
+    equipmentMessage.textContent = "Error updating equipment. Please try again.";
+  }
+
+  // ----------- TABLE UPDATE LOGIC STARTS HERE -----------
+  const equipmentTable = document.getElementById("equipment-table");
 
   if (!equipmentTable) {
     console.error("updateEquipmentTable: No equipment table found");
     return;
   }
 
-  if (!equipment || !Array.isArray(equipment)) {
-    console.error("updateEquipmentTable: Invalid equipment data received:", equipment);
-    message.textContent = "Invalid equipment data.";
-    return;
-  }
-
-  if (equipment.length === 0) {
-    message.textContent = "No equipment available.";
-    return;
-  }
-
   const user = JSON.parse(localStorage.getItem("user"));
   const userRole = user ? user.role : "user";
-  console.log('user role in table:', userRole);
 
-  if (userRole === 'user' && welcomeAddEquipmentButton) {
-    welcomeAddEquipmentButton.style.display = "none";
-  }
+  console.log("Updating Equipment Table...");
 
-  // clear tables and add headers
+  // Clear table and add headers
   equipmentTable.innerHTML = `
-  <tr>
-    <th>Brand</th>
-    <th>Mount</th>
-    <th>Focal Length</th>
-    <th>Aperture</th>
-    <th>Version</th>
-    <th>Serial Number</th>
-    <th>Updated By</th>
-    <th>Status</th>
-    ${userRole === 'user' ? '' : "<th colspan='2'>Actions</th>"}
-  </tr>
+    <tr>
+      <th>Brand</th>
+      <th>Mount</th>
+      <th>Focal Length</th>
+      <th>Aperture</th>
+      <th>Version</th>
+      <th>Serial Number</th>
+      <th>Updated By</th>
+      <th>Status</th>
+      ${userRole !== "user" ? "<th colspan='2'>Actions</th>" : ""}
+    </tr>
   `;
 
-  equipment.forEach((item) => {
-    if (!item || typeof item !== "object") {
-      console.warn('Skipping invalid item', item);
+  const equipmentData = await fetchAllEquipment(); // Fetch latest equipment data
+
+  equipmentData.forEach((item) => {
+    if (!item || typeof item !== "object" || !item._id) {
+      console.warn("Skipping invalid item:", item);
       return;
     }
+
+    // Ensure default values if missing
+    const updatedBy = item.updatedBy ? item.updatedBy : "Unknown";
+    const status = item.status ? item.status : "N/A";
 
     const row = document.createElement("tr");
     row.innerHTML = `
@@ -280,54 +360,58 @@ export function updateEquipmentTable(equipment) {
       <td>${item.aperture || "N/A"}</td>
       <td>${item.version || "N/A"}</td>
       <td>${item.serialNumber || "N/A"}</td>
-      <td>${item.updatedBy || "N/A"}</td>
-      <td>${item.status || "N/A"}</td>
+      <td>${updatedBy}</td>
+      <td>${status}</td>
       ${
-        userRole === 'user'
-        ? ''
-        : `
-      <td><button class="edit-button" data-id="${item._id}">Edit</button></td>
-      <td><button class="delete-button" data-id="${item._id}">Delete</button></td>
+        userRole !== "user"
+          ? `
+        <td><button class="edit-button" data-id="${item._id}">Edit</button></td>
+        <td><button class="delete-button" data-id="${item._id}">Delete</button></td>
       `
-    }`;
-
-    if (userRole !== 'user') {
-    row.querySelector(".edit-button").addEventListener("click", async (e) => {
-      const welcomeDiv = document.getElementById("welcome-div");
-      const editEquipmentDiv = document.getElementById("edit-equipment-div");
-      const equipmentDiv = document.getElementById("equipment-div");
-      const equipmentId = e.target.dataset.id;
-
-      console.log("Edit Button Clicked - Equipment ID:", equipmentId);
-
-      welcomeDiv.style.display = "none";
-      editEquipmentDiv.style.display = "block";
-      equipmentDiv.style.display = "none";
-
-      const equipmentData = await fetchEquipmentById(equipmentId);
-
-      if (!equipmentData) {
-        console.error("❌ Error: Could not load equipment data.");
-        return;
+          : ""
       }
-
-      console.log("✅ Calling showEditForm()...");
-      showEditForm(equipmentData);
-    });
-
-    row.querySelector(".delete-button").addEventListener("click", async (e) => {
-      const equipmentId = e.target.dataset.id;
-      console.log('delete equipment id:', equipmentId)
-      alert("Are you sure you want to delete this equipment?");
-      await deleteEquipment(equipmentId);
-      await fetchAndDisplayEquipment();
-    })
-  }
+    `;
 
     equipmentTable.appendChild(row);
-  })
-  console.log('table successfully updated');
+
+    // Attach event listeners for Edit & Delete buttons
+    const editButton = row.querySelector(".edit-button");
+    if (editButton) {
+      editButton.addEventListener("click", async (e) => {
+        e.preventDefault();
+        const equipmentId = e.target.dataset.id;
+        console.log("Edit Button Clicked - Equipment ID:", equipmentId);
+
+        const equipmentData = await fetchEquipmentById(equipmentId);
+        if (!equipmentData) {
+          console.error("Error: Could not load equipment data.");
+          return;
+        }
+
+        showEditForm(equipmentData);
+      });
+    }
+
+    const deleteButton = row.querySelector(".delete-button");
+    if (deleteButton) {
+      deleteButton.addEventListener("click", async (e) => {
+        e.preventDefault();
+        const equipmentId = e.target.dataset.id;
+        console.log("Delete equipment ID:", equipmentId);
+
+        const confirmed = confirm("Are you sure you want to delete this equipment?");
+        if (confirmed) {
+          await deleteEquipment(equipmentId);
+          await fetchAndDisplayEquipment();
+        }
+      });
+    }
+  });
+
+  console.log("Equipment table successfully updated.");
 }
+
+
 
 
 
@@ -338,10 +422,17 @@ export async function fetchEquipmentById(equipmentId) {
     return null;
   }
 
+  const authToken = localStorage.getItem("token");
+  if (!authToken) {
+      console.error("No token found. User is not authenticated.");
+      equipmentMessage.textContent = "You need to log in to view equipment.";
+      return;
+  }
+  
   try {
     const response = await fetch(`${API_URL}/equipment/${equipmentId}`, {
       method: 'GET',
-      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      headers: { Authorization: `Bearer ${authToken}` }
     })
 
     if (!response.ok) {
@@ -369,16 +460,23 @@ export async function fetchEquipmentById(equipmentId) {
 
 
 export async function deleteEquipment(id) {
-  try {
-    const response = await fetch(`${API_URL}/equipment/${id}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${token}` },
-    });
+  const authToken = localStorage.getItem("token");
+  if (!authToken) {
+      console.error("No token found. User is not authenticated.");
+      return;
+  }
 
-    if (!response.ok) throw new Error("Failed to delete equipment");
-    await fetchAndDisplayEquipment();
+  try {
+      const response = await fetch(`${API_URL}/equipment/${id}`, {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${authToken}` },
+      });
+
+      if (!response.ok) throw new Error("Failed to delete equipment");
+
+      await fetchAndDisplayEquipment();
   } catch (error) {
-    console.error("Error deleting equipment:", error);
-    message.textContent = "Error deleting equipment.";
+      console.error("Error deleting equipment:", error);
+      message.textContent = "Error deleting equipment.";
   }
 }

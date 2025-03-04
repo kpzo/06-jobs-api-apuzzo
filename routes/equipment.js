@@ -10,8 +10,10 @@ const {
     deleteEquipment,
 } = require('../controllers/equipment');
 
-const auth = require('../middleware/authentication');
-const checkRole = require('../middleware/authorizeRoles');
+console.log('createEquipment function:', createEquipment);
+
+const { auth } = require('../middleware/authentication');
+const { checkRole } = require('../middleware/authorizeRoles');
 
 
 router.route('/')

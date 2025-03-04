@@ -10,6 +10,7 @@ import {
 import { showLoginRegister } from "./loginRegister.js";
 import { showRegister } from "./register.js";
 import { showWelcome } from "./welcome.js";
+import { setupEventListeners } from "./equipment.js";
 
 
 
@@ -158,7 +159,8 @@ logonCancel.addEventListener("click", (e) => {
     const success = await handleLogin();
 
     if (success) {
-      setDiv(welcomeDiv);
+      welcomeDiv.style.display = "block";
+      showWelcome();
       loginRegisterDiv.style.display = "none";
       logonDiv.style.display = "none";
       message.textContent = "Welcome! Login successful.";
@@ -166,5 +168,6 @@ logonCancel.addEventListener("click", (e) => {
       setDiv(logonDiv);
       message.textContent = "Invalid credentials, please try again.";
     }
+    setupEventListeners();
   });
 });

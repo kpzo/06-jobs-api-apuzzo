@@ -12,7 +12,7 @@ const register = async (req, res) => {
         const user = await User.create({ ...req.body });
         const token = jwt.sign(
             { 
-                id: user._id, 
+                userId: user._id, 
                 name: user.name,
                 email: user.email,
                 role: user.role 
@@ -21,7 +21,7 @@ const register = async (req, res) => {
             { expiresIn: "1d" }
         );
         res.status(StatusCodes.CREATED).json({ 
-            user: { id: user._id, name: user.name, email: user.email, role: user.role }, 
+            user: { _id: user._id, name: user.name, email: user.email, role: user.role }, 
             token, 
         });
     } catch (error) {
@@ -56,10 +56,16 @@ const login = async (req, res) => {
     const userRole = user.role
 
     // Generate JWT Token
-    const token = user.createJWT();
-    if (!token) {
-        throw new Error("Failed to create JWT token");
-    }
+    const token = jwt.sign(
+        { 
+            userId: user._id, 
+            name: user.name,
+            email: user.email,
+            role: user.role 
+        },
+        process.env.JWT_SECRET,
+        { expiresIn: "1d" }
+    )
 
     // Log the role-based access control
     if (userRole === "admin") {
@@ -70,7 +76,7 @@ const login = async (req, res) => {
 
     // Return success response
     res.status(StatusCodes.OK).json({ 
-        user: { id: user._id, name: user.name, role: user.role }, 
+        user: { _id: user._id, name: user.name, role: user.role }, 
         token 
     });
 };

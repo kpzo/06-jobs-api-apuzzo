@@ -1,8 +1,10 @@
 const jwt = require('jsonwebtoken')
 const { UnauthenticatedError } = require('../errors')
 
+
+
 const auth = async (req, res, next) => {
-    console.log('auth middleware: checking authentication')
+    console.log("Received Token:", req.headers.authorization);
 
     const authHeader = req.headers.authorization
 
@@ -14,19 +16,20 @@ const auth = async (req, res, next) => {
     const token = authHeader.split(' ')[1]
 
     try {
-        const payload = jwt.verify(token, process.env.JWT_SECRET)
-        req.user = {
-            id: payload.id || payload.userId,
-            name: payload.name,
-            role: payload.role || 'user'
-        }
-        console.log('auth middleware: user authenticated', req.user)
+        const decoded = jwt.verify(token, process.env.JWT_SECRET)
+        console.log('decoded token:', decoded)
+        req.user = decoded
         next()
     } catch (error) {
         console.error('auth middleware: token validation failed', error)
         throw new UnauthenticatedError('Token Validation Failed')
     }   
+
+    console.log("Decoded Token:", jwt.decode(token));
 }
 
-module.exports = auth
+
+
+
+module.exports = { auth }
 // module.exports = auth
