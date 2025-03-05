@@ -1,62 +1,89 @@
-// ~controllers are functions that control the routes~
-// ------------------
-// import model
-const User = require('../models/User')
+const express = require('express');
+const router = express.Router();
+const { StatusCodes } = require('http-status-codes');
+const User = require('../models/User');
+const { BadRequestError, UnauthenticatedError } = require('../errors');
+const jwt = require('jsonwebtoken');
 
-// import libraries
-const { StatusCodes } = require('http-status-codes')
-
-// import error handler
-const { BadRequestError } = require('../errors')
-const { UnauthenticatedError } = require('../errors')
-
-// register user
+// Register user
 const register = async (req, res) => {
+     
+    try{
+        const user = await User.create({ ...req.body });
+        const token = jwt.sign(
+            { 
+                userId: user._id, 
+                name: user.name,
+                email: user.email,
+                role: user.role 
+            },
+            process.env.JWT_SECRET,
+            { expiresIn: "1d" }
+        );
+        res.status(StatusCodes.CREATED).json({ 
+            user: { _id: user._id, name: user.name, email: user.email, role: user.role }, 
+            token, 
+        });
+    } catch (error) {
+        if (error.code && error.code === 11000) {
+            return res.status(StatusCodes.CONFLICT).json({ error: "Duplicate value error: A user with this email already exists." });
+        } 
+        res.status(StatusCodes.BAD_REQUEST).json({ error: error.message });
+    }
+};
 
-    // create user
-    const user = await User.create({ ...req.body })
-    const token = user.createJWT()
-    
-    // send only name and pw token as response; store in local storage
-    res
-    .status(StatusCodes.CREATED)
-    .json({ user:{ name: user.name }, token })
-}
-
-
-// login user
+// Login user
 const login = async (req, res) => {
-//initial checking in controller
+    const { email, password } = req.body;
 
-    const { email, password } = req.body
-    
-    // check if user exists
     if (!email || !password) {
-        throw new BadRequestError('Please provide email and password')
+        throw new BadRequestError("Please provide email and password");
     }
 
-    const user = await User.findOne({ email })
-
+    // Find the user in the database
+    const user = await User.findOne({ email });
     if (!user) {
-        throw new UnauthenticatedError('Invalid Credentials')
+        throw new UnauthenticatedError("Invalid Email");
     }
-    
-    //compare password to hashed password in db
-    const isPasswordCorrect = await user.comparePassword(password)
+
+    // Check if password is correct
+    const isPasswordCorrect = await user.comparePassword(password);
     if (!isPasswordCorrect) {
-        throw new UnauthenticatedError('Invalid Credentials')
+        throw new UnauthenticatedError("Invalid Password");
     }
 
-    const token = user.createJWT()
-    res
-    .status(StatusCodes.OK)
-    .json({ user: { name: user.name }, token })
+    // Use the stored user role instead of a hardcoded function
+    const userRole = user.role
 
-}
+    // Generate JWT Token
+    const token = jwt.sign(
+        { 
+            userId: user._id, 
+            name: user.name,
+            email: user.email,
+            role: user.role 
+        },
+        process.env.JWT_SECRET,
+        { expiresIn: "1d" }
+    )
+
+    // Log the role-based access control
+    if (userRole === "admin") {
+        console.log("Access granted to admin section.");
+    } else {
+        console.log("Access denied to admin section.");
+    }
+
+    // Return success response
+    res.status(StatusCodes.OK).json({ 
+        user: { _id: user._id, name: user.name, role: user.role }, 
+        token 
+    });
+};
+
+
 
 module.exports = {
-    register,
-    login,
-}
-
-// mongoose middleware needed to de-bloat code in this controller
+  register,
+  login,
+};

@@ -1,25 +1,35 @@
-const User = require('../models/User')
 const jwt = require('jsonwebtoken')
 const { UnauthenticatedError } = require('../errors')
 
 
+
 const auth = async (req, res, next) => {
-    // check header
+    console.log("Received Token:", req.headers.authorization);
+
     const authHeader = req.headers.authorization
-    if(!authHeader || !authHeader.startsWith('Bearer')){
-        throw new UnauthenticatedError('Authentication invalid')
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        console.error('auth middleware: no token provided')
+        return next()
     }
+
     const token = authHeader.split(' ')[1]
 
     try {
-        const payload = jwt.verify(token, process.env.JWT_SECRET)
-        // attach the user to the request object (equipment)
-        req.user = { userId: payload.userId, name: payload.name }
+        const decoded = jwt.verify(token, process.env.JWT_SECRET)
+        console.log('decoded token:', decoded)
+        req.user = decoded
         next()
     } catch (error) {
-        throw new UnauthenticatedError('Authentication invalid')
-    }
+        console.error('auth middleware: token validation failed', error)
+        throw new UnauthenticatedError('Token Validation Failed')
+    }   
 
+    console.log("Decoded Token:", jwt.decode(token));
 }
 
-module.exports = auth
+
+
+
+module.exports = { auth }
+// module.exports = auth

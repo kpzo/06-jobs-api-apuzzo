@@ -5,6 +5,11 @@ const jwt = require('jsonwebtoken')
 
 
 const UserSchema = new mongoose.Schema({
+    userId:{
+        type:mongoose.Schema.Types.ObjectId,
+        required:true,
+        default:mongoose.Types.ObjectId(),
+    },
     name:{
         type:String,
         required:[true, 'Please provide a name'],
@@ -25,6 +30,11 @@ const UserSchema = new mongoose.Schema({
         required:[true, 'Please provide a password'],
         minlength:6,
     },
+    role:{
+        type:String,
+        enum:['user', 'staff', 'admin'],
+        default:'user',
+    },
 })
 
 // using "async function" so the schema referrs to OUR document (for commands like 'this.' etc) to gather specific user data from our db to hash the passwords before saving 
@@ -35,7 +45,9 @@ UserSchema.pre('save', async function(){
 
 // once again use 'function' to refer to our document for specific user data
 UserSchema.methods.createJWT = function() {
-    return jwt.sign({ userId: this._id, name: this.name }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_LIFETIME })
+    return jwt.sign({ userId: this._id, name: this.name, email: this.email, role: this.role  }, 
+        process.env.JWT_SECRET, 
+        { expiresIn: process.env.JWT_LIFETIME })
 }
 
 UserSchema.methods.comparePassword = async function(providedPassword) {
@@ -44,5 +56,16 @@ UserSchema.methods.comparePassword = async function(providedPassword) {
 }
 
 // to keep logic in all place (UserSchema) - generate token using instance method instead of having it in the controller
+
+UserSchema.methods.updateRole = async function(newRole) {
+    this.role = newRole;
+    await this.save();
+};
+
+
+UserSchema.statics.findByRole = async function(role) {
+    return await this.find({ role });
+};
+
 
 module.exports = mongoose.model('User', UserSchema)

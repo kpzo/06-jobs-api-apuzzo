@@ -1,20 +1,29 @@
-const express = require('express')
-const router = express.Router()
+const express = require('express');
+const router = express.Router();
 
-const { 
+
+const {
     getAllEquipment,
     getEquipment,
-    updateEquipment,
     createEquipment,
-    deleteEquipment, } = require('../controllers/equipment')
+    updateEquipment,
+    deleteEquipment,
+} = require('../controllers/equipment');
+
+console.log('createEquipment function:', createEquipment);
+
+const { auth } = require('../middleware/authentication');
+const { checkRole } = require('../middleware/authorizeRoles');
+
 
 router.route('/')
-    .post(createEquipment)
     .get(getAllEquipment)
+    .post(auth, checkRole, createEquipment);
 
 router.route('/:id')
     .get(getEquipment)
-    .delete(deleteEquipment)
-    .put(updateEquipment)
+    .patch(auth, checkRole, updateEquipment)
+    .delete(auth, checkRole, deleteEquipment)
+    .put(auth, checkRole, updateEquipment);
 
-module.exports = router
+module.exports = router;
